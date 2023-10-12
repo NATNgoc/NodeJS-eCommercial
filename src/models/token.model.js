@@ -8,7 +8,7 @@ const COLLECTION_NAME = 'keys';
 var keyTokenSchema = new mongoose.Schema({
     userid: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: true,
     },
     publicKey: {
         type: String,

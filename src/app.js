@@ -18,9 +18,6 @@ app.use(express.json())
 require('./dbs/init.mongdb')
 // //init route
 require('./routes/access/index')(app)
-//test
-TokenService.verify()
-
 
 
 module.exports = app

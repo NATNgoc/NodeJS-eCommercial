@@ -4,7 +4,8 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const accessController = require('../../controllers/access.controller')
 const initApiRoute = (app) => {
-    router.get('/shop/signup', accessController.signUp)
+    router.post('/shop/signup', accessController.signUp)
+    router.post('/shop/login', accessController.signUp)
     return app.use('/api/v1', router)
 }
 

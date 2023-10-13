@@ -28,17 +28,18 @@ class TokenService {
         return { privateKey, publicKey }
     }
 
-    static async updateTokenKey(userId, publicKey) {
+    static async updateTokenKey(userId, publicKey, refreshKey) {
         const publicKeyString = publicKey.toString()
         const filter = { userid: userId }
         const currentUser = await shopModel.findOne(filter).lean()
         const updateObject = {
             userid: userId,
             publicKey: publicKeyString,
-            refreshKey: [publicKeyString]
+            refreshKey: [refreshKey]
         }
         const options = { upsert: true, new: true };
-        if (!currentUser) {
+        if (currentUser) {
+            updateObject.refreshKey = currentUser.refreshKey.push(refreshKey)
             await tokenModel.findOneAndReplace(filter, updateObject, options)
         } else {
             await tokenModel.create(updateObject)

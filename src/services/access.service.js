@@ -24,7 +24,7 @@ class AccessService {
         const newShop = await shopModel.create({
             name, email, password: hashedPassword, roles: [roles.SHOP]
         })
-        console.log(getInfoData(['name', 'email'], newShop))
+
         //New shop Được tạo thành công
         if (newShop) {
             const { accessToken, refreshToken } = await TokenService.genToken(newShop)
@@ -47,7 +47,7 @@ class AccessService {
     }
 
     static login = async ({ email, password }) => {
-
+        const hashedPassword = await bcrypt.hash(password, 10)
     }
 
 }

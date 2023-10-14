@@ -32,8 +32,7 @@ class AccessService {
             return {
                 shop: getInfoData(['name', 'email'], newShop),
                 accessToken: accessToken,
-                refreshToken: refreshToken,
-                refreshTokenUsed: []
+                refreshToken: refreshToken
             }
         }
         throw new errorHanlder.NotFoundError()
@@ -56,7 +55,7 @@ class AccessService {
         if (!match) {
             throw new errorHanlder.AuthError("Not correct password")
         }
-        const { accessToken, refreshToken } = await TokenService.genToken(shop)
+        const { accessToken, refreshToken } = await TokenService.genToken(shop[0])
         return {
             accessToken,
             refreshToken

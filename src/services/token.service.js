@@ -3,18 +3,21 @@ const crypto = require('crypto')
 const tokenModel = require('../models/token.model')
 const jwt = require('jsonwebtoken')
 const shopModel = require('../models/shop.model')
+const { Mongoose } = require('mongoose')
 class TokenService {
-    static genToken = async (userInfo) => {
+    static genToken = async (shop) => {
         //create publickey , private
         //Luu keypublic vao db
         //sign Token bang private key
         const { privateKey, publicKey } = await this.genPubicAndPrivateKey()
         const { accessToken, refreshToken } = await this.createPairToken({
-            userid: userInfo._id,
-            email: userInfo.email
+            userid: shop._id,
+            email: shop.email
         }, privateKey
         )
-        await this.updateTokenKey(userInfo._id, publicKey, refreshToken)
+        console.log(
+            "SHOP", shop)
+        await this.updateTokenKey(shop._id, publicKey, refreshToken)
         return {
             accessToken,
             refreshToken
@@ -34,11 +37,12 @@ class TokenService {
 
     static async updateTokenKey(userId, publicKey, refreshKey) {
         const publicKeyString = publicKey.toString()
+        const refreshKeyString = refreshKey.toString()
         const filter = { userid: userId }
         const updateObject = {
             userid: userId,
             publicKey: publicKeyString,
-            refreshToken: refreshKey,
+            refreshToken: refreshKeyString,
             refreshTokenUsed: []
         }
         console.log("Update Object", updateObject)

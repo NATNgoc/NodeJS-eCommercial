@@ -1,7 +1,9 @@
 const shopModel = require('../models/shop.model')
+const shopService = require('./shop.service')
 const { getInfoData } = require('../utils')
 const TokenService = require('./token.service')
 const bcrypt = require('bcrypt')
+const errorHanlder = require('../core/error.response')
 const roles = {
     SHOP: 'SHOP',
     WRITER: 'WRITER',
@@ -10,13 +12,10 @@ const roles = {
 class AccessService {
 
     static signUp = async ({ name, email, password }) => {
-
-        const currentShop = await shopModel.findOne({ email }).lean()
-        if (currentShop) {
-            return {
-                code: "404",//
-                message: 'Shop already registered'
-            }
+        console.log("SHOP ALREADY REGISTERED")
+        const currentShop = await shopModel.find({ email }).lean()
+        if (currentShop.length > 0) {
+            throw new errorHanlder.ConflictRequestError("Error: Shop already registered")
         }
         //Hash mật khẩu ra để lưu xuống db
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -31,23 +30,37 @@ class AccessService {
             console.log({ accessToken, refreshToken })
             console.log("Create token success::::", { accessToken, refreshToken })
             return {
-                code: 201,
-                message: "Đăng kí thành công",
-                metadata: {
-                    shop: getInfoData(['name', 'email'], newShop),
-                    accessToken: accessToken,
-                    refreshKey: refreshToken
-                }
+                shop: getInfoData(['name', 'email'], newShop),
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                refreshTokenUsed: []
             }
         }
-        return {
-            code: 404,
-            message: "Đăng kí thất bại",
-        }
+        throw new errorHanlder.NotFoundError()
     }
 
-    static login = async ({ email, password }) => {
-        const hashedPassword = await bcrypt.hash(password, 10)
+    //refreshToken được truyền vào lại khi refreshToken còn lưu trữ trong cookies, không cần truy cập lại db
+    static login = async ({ email, password, refreshTokenCookie = null }) => {
+        /*
+        1 - check email in db
+        2 - match password
+        3 - create AT vs RT and save
+        4 - generate tokens
+        5 - get data return login 
+        */
+        const shop = await shopModel.find({ email }).select({ _id: 1, name: 1, email: 1, password: 1 }).lean()
+        if (shop.length === 0) {
+            throw new errorHanlder.AuthError("Shop isn't registered")
+        }
+        const match = await bcrypt.compare(password, shop[0].password)
+        if (!match) {
+            throw new errorHanlder.AuthError("Not correct password")
+        }
+        const { accessToken, refreshToken } = await TokenService.genToken(shop)
+        return {
+            accessToken,
+            refreshToken
+        }
     }
 
 }

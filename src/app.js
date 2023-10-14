@@ -14,11 +14,26 @@ app.use(morgan('dev'))
 app.use(helmet())
 app.use(compression())
 app.use(express.json())
+//init route
+require('./routes/access/index')(app)
 //init DB
 require('./dbs/init.mongdb')
-// //init route
-require('./routes/access/index')(app)
 
+// hanlde error
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404
+    next(error)
+})
+
+app.use((error, req, res, next) => {
+    const statusCode = error.status || 500;
+    console.error(error)
+    return res.status(statusCode).json({
+        code: statusCode,
+        message: error.message
+    })
+})
 
 module.exports = app
 

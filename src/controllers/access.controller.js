@@ -1,25 +1,21 @@
 
 const AccessService = require('../services/access.service')
-
+const SuccesResponse = require('../core/success.response')
+const ErrorResponse = require('../core/error.response')
 class AccessController {
 
     signUp = async (req, res, next) => {
-        try {
-            const message = await AccessService.signUp(req.body)
-            console.log(message.code)
-            return res.status(message.code).send({
-                message: message
-            })
-        } catch (err) {
-            return res.status(500).send(err)
-        }
+        return new SuccesResponse.CreatedResponse({
+            message: "Sign Up succesfully",
+            metaData: await AccessService.signUp(req.body)
+        }).send(res)
+
     }
     login = async (req, res, next) => {
-        try {
-            const message = await AccessService.login()
-        } catch (err) {
-
-        }
+        return new SuccesResponse.OkResponse({
+            message: "Login succesfully",
+            metaData: await AccessService.login(req.body)
+        }).send(res)
     }
 }
 const accessController = new AccessController()

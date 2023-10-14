@@ -9,12 +9,16 @@ class TokenService {
         //Luu keypublic vao db
         //sign Token bang private key
         const { privateKey, publicKey } = await this.genPubicAndPrivateKey()
-        await this.updateTokenKey(userInfo._id, publicKey)
-        return await this.createPairToken({
+        const { accessToken, refreshToken } = await this.createPairToken({
             userid: userInfo._id,
             email: userInfo.email
         }, privateKey
         )
+        await this.updateTokenKey(userInfo._id, publicKey, refreshToken)
+        return {
+            accessToken,
+            refreshToken
+        }
 
 
     }
@@ -31,19 +35,15 @@ class TokenService {
     static async updateTokenKey(userId, publicKey, refreshKey) {
         const publicKeyString = publicKey.toString()
         const filter = { userid: userId }
-        const currentUser = await shopModel.findOne(filter).lean()
         const updateObject = {
             userid: userId,
             publicKey: publicKeyString,
-            refreshKey: [refreshKey]
+            refreshToken: refreshKey,
+            refreshTokenUsed: []
         }
+        console.log("Update Object", updateObject)
         const options = { upsert: true, new: true };
-        if (currentUser) {
-            updateObject.refreshKey = currentUser.refreshKey.push(refreshKey)
-            await tokenModel.findOneAndReplace(filter, updateObject, options)
-        } else {
-            await tokenModel.create(updateObject)
-        }
+        await tokenModel.findOneAndUpdate(filter, updateObject, options)
     }
 
     static async createPairToken(payload, privateKey) {

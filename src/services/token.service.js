@@ -64,13 +64,13 @@ class TokenService {
             refreshToken
         }
     }
-    static async findByShopId({ id }) {
+    static async findByShopId(id) {
         const shop = await tokenModel.findOne({ userid: new Types.ObjectId(id) }).lean()
-        console.log(shop)
-        return !shop ? {} : shop
+
+        return shop
     }
-    static removeTokenById = async ({ id }) => {
-        const result = await keyTokenModel.deleteOne({
+    static removeTokenById = async (id) => {
+        const result = await tokenModel.deleteOne({
             _id: new Types.ObjectId(id)
         })
         return result;

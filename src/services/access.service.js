@@ -12,7 +12,6 @@ const roles = {
 class AccessService {
 
     static signUp = async ({ name, email, password }) => {
-        console.log("SHOP ALREADY REGISTERED")
         const currentShop = await shopModel.find({ email }).lean()
         if (currentShop.length > 0) {
             throw new errorHanlder.ConflictRequestError("Error: Shop already registered")
@@ -35,7 +34,7 @@ class AccessService {
                 refreshToken: refreshToken
             }
         }
-        throw new errorHanlder.NotFoundError()
+        throw new errorHanlder.NotFoundError("Not success creating for shop")
     }
 
     //refreshToken được truyền vào lại khi refreshToken còn lưu trữ trong cookies, không cần truy cập lại db
@@ -64,7 +63,7 @@ class AccessService {
 
 
     static logout = async (keyStore) => {
-        const delKey = await TokenService.removeTokenById(keyStore.userid)
+        const delKey = await TokenService.removeTokenById(keyStore._id)
         console.log(delKey)
         return { delKey }
     }

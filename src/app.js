@@ -14,7 +14,7 @@ app.use(morgan('dev'))
 app.use(helmet())
 app.use(compression())
 app.use(express.json())
-//init route
+//init access route
 require('./routes/access/index')(app)
 //init DB
 require('./dbs/init.mongdb')

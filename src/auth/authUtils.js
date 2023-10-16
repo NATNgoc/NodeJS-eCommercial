@@ -18,7 +18,6 @@ const authentication = async (req, res, next) => {
     */
 
     //check userID
-    console.log(req.headers)
     if (!req.headers[HEADER.client_id]) {
         throw new errorHandler.NotFoundError('invalid id')
     }
@@ -29,7 +28,6 @@ const authentication = async (req, res, next) => {
         throw new errorHandler.NotFoundError('Not valid user')
     }
     req.keyStore = keyStore
-
     //check access token
     if (!req.headers.authorization) {
         throw new errorHandler.NotFoundError('Not found access token')
@@ -43,6 +41,7 @@ const authentication = async (req, res, next) => {
     //verify token
     try {
         const publicKeyObject = await crypto.createPublicKey(keyStore.publicKey);
+        console.log("Access token::::", accessToken, publicKeyObject)
         jwt.verify(accessToken, publicKeyObject)
     } catch (err) {
         throw new errorHandler.AuthError("invalid access token")

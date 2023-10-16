@@ -1,15 +1,7 @@
 'use strict'
 
 const { statusCode, reasonPhrases } = require('../utils/httpStatusCode')
-//Custom message and status code
-// const successStatus = {
-//     OK: 200,
-//     CREATED: 201
-// }
-// const succesMessage = {
-//     OK: 'Success!',
-//     CREATED: 'Created!'
-// }
+
 
 
 class SuccesResponse {

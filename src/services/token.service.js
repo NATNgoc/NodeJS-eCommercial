@@ -3,7 +3,7 @@ const crypto = require('crypto')
 const tokenModel = require('../models/token.model')
 const jwt = require('jsonwebtoken')
 const shopModel = require('../models/shop.model')
-const { Mongoose } = require('mongoose')
+const { Mongoose, Types } = require('mongoose')
 class TokenService {
     static genToken = async (shop) => {
         //create publickey , private
@@ -38,7 +38,7 @@ class TokenService {
     static async updateTokenKey(userId, publicKey, refreshKey) {
         const publicKeyString = publicKey.toString()
         const refreshKeyString = refreshKey.toString()
-        const filter = { userid: userId }
+        const filter = { userid: new Types.ObjectId(userId) }
         const updateObject = {
             userid: userId,
             publicKey: publicKeyString,
@@ -64,7 +64,17 @@ class TokenService {
             refreshToken
         }
     }
-
+    static async findByShopId({ id }) {
+        const shop = await tokenModel.findOne({ userid: new Types.ObjectId(id) }).lean()
+        console.log(shop)
+        return !shop ? {} : shop
+    }
+    static removeTokenById = async ({ id }) => {
+        const result = await keyTokenModel.deleteOne({
+            _id: new Types.ObjectId(id)
+        })
+        return result;
+    }
 }
 
 

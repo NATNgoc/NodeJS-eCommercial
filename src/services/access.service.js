@@ -62,6 +62,13 @@ class AccessService {
         }
     }
 
+
+    static logout = async (keyStore) => {
+        const delKey = await TokenService.removeTokenById(keyStore.userid)
+        console.log(delKey)
+        return { delKey }
+    }
+
 }
 
 module.exports = AccessService

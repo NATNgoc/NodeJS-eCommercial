@@ -10,13 +10,21 @@ class TokenService {
         //Luu keypublic vao db
         //sign Token bang private key
         const { privateKey, publicKey } = await this.genPubicAndPrivateKey()
-        const { accessToken, refreshToken } = await this.createPairToken({
-            userid: shop._id,
-            email: shop.email
-        }, privateKey
+        const { accessToken, refreshToken } = await this.createPairToken(
+            {
+                userid: shop._id,
+                email: shop.email
+            },
+            privateKey,
+            {
+                algorithm: 'RS256',
+                expiresIn: '2days'
+            },
+            {
+                algorithm: 'RS256',
+                expiresIn: '7days'
+            }
         )
-        console.log(
-            "SHOP", shop)
         await this.updateTokenKey(shop._id, publicKey, refreshToken)
         return {
             accessToken,
@@ -45,33 +53,32 @@ class TokenService {
             refreshToken: refreshKeyString,
             refreshTokenUsed: []
         }
-        console.log("Update Object", updateObject)
         const options = { upsert: true, new: true };
         await tokenModel.findOneAndUpdate(filter, updateObject, options)
     }
 
-    static async createPairToken(payload, privateKey) {
-        const accessToken = await jwt.sign(payload, privateKey, {
-            algorithm: 'RS256',
-            expiresIn: '2days'
-        })
-        const refreshToken = await jwt.sign(payload, privateKey, {
-            algorithm: 'RS256',
-            expiresIn: '7days'
-        })
+    static async createPairToken(payload, privateKey, optionAccessToken, optionRefreshToken) {
+        const accessToken = await jwt.sign(payload, privateKey, optionAccessToken)
+        const refreshToken = await jwt.sign(payload, privateKey, optionRefreshToken)
         return {
             accessToken,
             refreshToken
         }
     }
+
     static async findByShopId(id) {
         const shop = await tokenModel.findOne({ userid: new Types.ObjectId(id) }).lean()
-
         return shop
     }
     static removeTokenById = async (id) => {
         const result = await tokenModel.deleteOne({
             _id: new Types.ObjectId(id)
+        })
+        return result;
+    }
+    static removeTokenByUserId = async (userId) => {
+        const result = await tokenModel.deleteOne({
+            userid: new Types.ObjectId(userId)
         })
         return result;
     }

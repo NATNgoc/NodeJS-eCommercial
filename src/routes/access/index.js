@@ -13,6 +13,7 @@ const initApiRoute = (app) => {
     router.post('/shop/login', errorHanlder.functionHanlder(accessController.login))
     router.use(errorHanlder.functionHanlder(authentication))
     router.post('/shop/logout', errorHanlder.functionHanlder(accessController.logout))
+    router.post('/shop/refreshtoken', errorHanlder.functionHanlder(accessController.refreshTokenAccess))
     return app.use('/api/v1', router)
 }
 

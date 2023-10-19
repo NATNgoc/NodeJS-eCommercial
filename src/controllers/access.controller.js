@@ -9,7 +9,6 @@ class AccessController {
             message: "Sign Up succesfully",
             metaData: await AccessService.signUp(req.body)
         }).send(res)
-
     }
     login = async (req, res, next) => {
         return new SuccesResponse.OkResponse({
@@ -21,6 +20,16 @@ class AccessController {
         return new SuccesResponse.OkResponse({
             message: "Logout succesfully!",
             metaData: await AccessService.logout(req.keyStore)
+        }).send(res)
+    }
+    refreshTokenAccess = async (req, res, next) => {
+        return new SuccesResponse.OkResponse({
+            message: "Refresh Token successfully!",
+            metaData: await AccessService.refreshToken(
+                req.keyStore,
+                req.refreshToken,
+                req.shop
+            )
         }).send(res)
     }
 }

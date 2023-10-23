@@ -25,6 +25,7 @@ const authentication = async (req, res, next) => {
 
     //check Keystore
     const keyStore = await TokenService.findByShopId(req.headers[HEADER.client_id])
+    console.log(keyStore)
     if (!keyStore) {
         throw new errorHandler.AuthError("User isn't login!")
     }
@@ -66,7 +67,7 @@ const handleForRefreshToken = async (keyStore, req) => {
         req.shop = decodeShop
         req.refreshToken = refreshToken
     } catch {
-        throw new errorHandler.AuthError('invalide accessToken')
+        throw new errorHandler.AuthError('invalide refreshToken')
     }
 }
 

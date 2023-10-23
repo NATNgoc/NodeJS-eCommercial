@@ -5,29 +5,118 @@ const TokenService = require('./token.service')
 const bcrypt = require('bcrypt')
 const errorHanlder = require('../core/error.response')
 const tokenModel = require('../models/token.model')
+const utils = require('../utils/index')
 const roles = {
     SHOP: 'SHOP',
     WRITER: 'WRITER',
     ADMIN: 'ADMIN'
 }
+//----------------MAIN SERVICE FUNCTION--------------------------------------
+class AccessService {
 
-const isRegisteredShop = async (email) => {
-    const currentShop = await shopModel.findOne({ email }).select({ _id: 1, name: 1, email: 1, password: 1 }).lean() || {}
-    if (isEmptyObject(currentShop)) {
-        return false
+    static signUp = async ({ name, email, password }) => {
+        //Kiểm tra shop đã đăng ký chưa
+        if (await isRegisteredShop(email)) throw new errorHanlder.ConflictRequestError("Error: Shop already registered")
+        //Tạo shop
+        return await createNewShop(name, email, password, [roles.SHOP])
     }
-    return currentShop;
+
+
+    static login = async ({ email, password, refreshTokenCookie = null }) => {
+        //refreshToken được truyền vào lại khi refreshToken còn lưu trữ trong cookies, không cần truy cập lại db
+        const shop = await isValidateForLogin(email, password)
+        if (!utils.isEmptyObject(shop)) {
+            const { accessToken, refreshToken } = await genTokenForShop(shop)
+            return {
+                accessToken,
+                refreshToken
+            }
+        }
+        throw new errorHanlder.NotFoundError('Something went wrong!! pls check again')
+    }
+
+    static logout = async (keyStore) => {
+        const delKey = await TokenService.removeTokenById(keyStore._id)
+        console.log(delKey)
+        return { delKey }
+    }
+
+    static refreshToken = async (keyStore, refreshToken, shop) => {
+        const currentShop = await isValidateForRefreshToken(keyStore, refreshToken, shop)
+        if (!utils.isEmptyObject(currentShop)) {
+            return await handleRefresingToken(shop, keyStore)
+        }
+        throw new errorHanlder.NotFoundError('Something went wrong')
+    }
+
+}
+//----------------SUB SERVICE FUNCTION--------------------------------------
+
+async function handleRefresingToken(shop, keyStore) {
+    const usedRefreshToken = keyStore.refreshToken
+    const { accessToken, refreshToken } = await TokenService.genToken(shop)
+    console.log("Key store", keyStore)
+    return {
+        message: "hehee"
+    }
+    // await tokenModel.updateOne({ _id: keyStore._id }, {
+    //     $set: {
+    //         refreshToken: refreshToken
+    //     },
+    //     $addToSet: {
+    //         refreshTokenUsed: usedRefreshToken
+    //     }
+    // })
+    // return {
+    //     name: shop.name,
+    //     email: shop.email,
+    //     metaData: {
+    //         accessToken,
+    //         refreshToken
+    //     }
+    // }
 }
 
-const isEmptyObject = (object) => {
-    return Object.keys(object).length === 0
+async function isValidateForRefreshToken(keyStore, refreshToken, shop) {
+    const { userid, email } = shop
+    //check refreshToken đã sử dụng chưa
+    if (isUsedRefreshToken(keyStore, refreshToken)) {
+        await hanldeForUsedRefreshToken(keyStore)
+    }
+
+    //check có khớp refreshToken ở db không
+    if (keyStore.refreshToken !== refreshToken) {
+        throw new errorHanlder.ForBiddenRequestError('invalid refresh token')
+    }
+
+    const currentShop = isRegisteredShop(email)
+    if (!currentShop) throw new errorHanlder.NotFoundError("Shop isn't register")
+    return currentShop
 }
 
-const hashStringByBcrypt = async (string) => {
-    return await bcrypt.hash(string, 10)
+async function isValidateForLogin(email, password) {
+    // 1 - check shop đã đăng ký chưa
+    // 2 - match password
+    const shop = await isRegisteredShop(email)
+    if (!shop) {
+        throw new errorHanlder.AuthError("Shop isn't registered!!!")
+    }
+    if (!await isCorrectPassword(password, shop.password)) throw new errorHanlder.AuthError("Not correct password")
+
+    //if have validation for login, retrun shop
+    return shop
 }
 
-const createNewShop = async (name, email, password, roles) => {
+async function hanldeForUsedRefreshToken(keyStore) {
+    await TokenService.removeTokenByUserId(keyStore.userid)
+    throw new errorHanlder.ForBiddenRequestError('Something went wrong! please login again')
+}
+
+function isUsedRefreshToken(keyStore, keyCheck) {
+    return keyStore.refreshTokenUsed.includes(keyCheck)
+}
+
+async function createNewShop(name, email, password, roles) {
     /*
     1 - hash password
     2 - Insert newShop vào db
@@ -44,18 +133,8 @@ const createNewShop = async (name, email, password, roles) => {
     throw new errorHanlder.NotFoundError("Not success creating for shop")
 }
 
-const isCorrectPassword = async (password, correctPassword) => {
-    const match = await bcrypt.compare(password, correctPassword)
-    if (!match) {
-        return false
-    }
-    return true
-}
-
-const genTokenForShop = async (shop) => {
+async function genTokenForShop(shop) {
     const { accessToken, refreshToken } = await TokenService.genToken(shop)
-    console.log({ accessToken, refreshToken })
-    console.log("Create token success::::", { accessToken, refreshToken })
     return {
         shop: getInfoData(['name', 'email'], shop),
         accessToken: accessToken,
@@ -63,64 +142,25 @@ const genTokenForShop = async (shop) => {
     }
 }
 
-class AccessService {
-
-    static signUp = async ({ name, email, password }) => {
-        //Kiểm tra shop đã đăng ký chưa
-        if (await isRegisteredShop(email)) throw new errorHanlder.ConflictRequestError("Error: Shop already registered")
-        //Tạo shop
-        return await createNewShop(name, email, password, [roles.SHOP])
+async function isCorrectPassword(password, correctPassword) {
+    const match = await bcrypt.compare(password, correctPassword)
+    if (!match) {
+        return false
     }
+    return true
+}
 
-    //refreshToken được truyền vào lại khi refreshToken còn lưu trữ trong cookies, không cần truy cập lại db
-    static login = async ({ email, password, refreshTokenCookie = null }) => {
-        /*
-        1 - check shop đã đăng ký chưa
-        2 - match password
-        3 - create AT vs RT and save
-        4 - generate tokens
-        5 - get data return login 
-        */
-        const shop = await isRegisteredShop(email)
-        if (!shop) {
-            throw new errorHanlder.AuthError("Shop isn't registered")
-        }
 
-        if (!await isCorrectPassword(password, shop.password)) throw new errorHanlder.AuthError("Not correct password")
-
-        const { accessToken, refreshToken } = await genTokenForShop(shop)
-        return {
-            accessToken,
-            refreshToken
-        }
+async function isRegisteredShop(email) {
+    const currentShop = await shopModel.findOne({ email }).select({ _id: 1, name: 1, email: 1, password: 1 }).lean() || {}
+    if (utils.isEmptyObject(currentShop)) {
+        return false
     }
+    return currentShop;
+}
 
-
-    static logout = async (keyStore) => {
-        const delKey = await TokenService.removeTokenById(keyStore._id)
-        console.log(delKey)
-        return { delKey }
-    }
-
-    static refreshToken = async (keyStore, refreshToken, shop) => {
-        console.log({ keyStore, refreshToken, shop })
-        const { userid, email } = shop
-        //check refreshToken đã sử dụng chưa
-        if (keyStore.refreshTokenUsed.includes(refreshToken)) {
-            TokenService.removeTokenByUserId(keyStore.userid)
-            throw new errorHanlder.ForBiddenRequestError('Something went wrong! please login again')
-        }
-
-        //check khớp refreshToken
-        if (keyStore.refreshToken !== refreshToken) {
-            throw new errorHanlder.ForBiddenRequestError('invalid refresh token')
-        }
-
-        const currentShop = await shopService.findByEmail(email)
-        if (!currentShop) throw new errorHanlder.NotFoundError("shop isn't register")
-        return await TokenService.genToken(currentShop)
-    }
-
+async function hashStringByBcrypt(string) {
+    return await bcrypt.hash(string, 10)
 }
 
 module.exports = AccessService

@@ -28,14 +28,11 @@ var productSchema = new mongoose.Schema({
     product_type: {
         type: String,
         required: true,
-        enum: ['Electronics', 'Clothing', 'Furniture']
+        enum: ['Electronic', 'Clothing']
     },
-    product_shop: {
-        type: String,
-    },
-    product_atrributes_id: {
-        type: String,
-        require: true
+    product_shop_id: {
+        type: mongoose.Types.ObjectId,
+        required: true
     }
 }, {
     collection: PRODUCT_COLLECTION_NAME,
@@ -44,27 +41,40 @@ var productSchema = new mongoose.Schema({
 
 var clothingSchema = new mongoose.Schema({
     brand: {
-        brand: {
-            type: String,
-            require: true
-        }
+        type: String,
+        require: true
     },
-    size: String,
-    material: String
+    size: {
+        type: Array,
+        default: []
+    },
+    material: String,
+    product_shop_id: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    }
 }, {
     collection: CLOTHING_COLLECTION_NAME,
     timestamps: true
 })
 
 var electionicSchema = new mongoose.Schema({
-    brand: {
-        brand: {
-            type: String,
-            require: true
-        }
+    type_connect: {
+        type: String,
+        required: true,
+        enum: ['Bluetooth', 'Wired']
     },
-    size: String,
-    material: String
+    battery_capacity: {
+        type: Number,
+    },
+    warranty_time: {
+        type: String,
+        required: true
+    },
+    product_shop_id: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    }
 }, {
     collection: ELECTIONIC_COLLECTION_NAME,
     timestamps: true
@@ -74,6 +84,6 @@ var electionicSchema = new mongoose.Schema({
 //Export the model
 module.exports = {
     productModel: mongoose.model(PRODCUT_DOCUMENTS_NAME, productSchema),
-    clothingModel: mongoose.model(CLOTHING_DOCUMENTS_NAME, productSchema),
-    electronicModel: mongoose.model(ELECTRONIC_DOCUMENTS_NAME, productSchema)
+    clothingModel: mongoose.model(CLOTHING_DOCUMENTS_NAME, clothingSchema),
+    electronicModel: mongoose.model(ELECTRONIC_DOCUMENTS_NAME, electionicSchema)
 }

@@ -9,6 +9,7 @@ var keyTokenSchema = new mongoose.Schema({
     userid: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
+        ref: 'shops'
     },
     publicKey: {
         type: String,

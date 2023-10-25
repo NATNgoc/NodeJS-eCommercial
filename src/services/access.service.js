@@ -51,7 +51,6 @@ class AccessService {
 
 }
 //----------------SUB SERVICE FUNCTION--------------------------------------
-
 async function handleRefresingToken(shop, keyStore) {
     const usedRefreshToken = keyStore.refreshToken
     const { accessToken, refreshToken } = await TokenService.genToken(shop)
@@ -59,22 +58,6 @@ async function handleRefresingToken(shop, keyStore) {
     return {
         message: "hehee"
     }
-    // await tokenModel.updateOne({ _id: keyStore._id }, {
-    //     $set: {
-    //         refreshToken: refreshToken
-    //     },
-    //     $addToSet: {
-    //         refreshTokenUsed: usedRefreshToken
-    //     }
-    // })
-    // return {
-    //     name: shop.name,
-    //     email: shop.email,
-    //     metaData: {
-    //         accessToken,
-    //         refreshToken
-    //     }
-    // }
 }
 
 async function isValidateForRefreshToken(keyStore, refreshToken, shop) {

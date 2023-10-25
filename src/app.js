@@ -16,8 +16,8 @@ app.use(compression())
 app.use(express.json())
 //init access route
 require('./routes/access/index')(app)
-//init DB
-require('./dbs/init.mongdb')
+//init product route
+require('./routes/shop/index')(app)
 
 // hanlde error
 app.use((req, res, next) => {

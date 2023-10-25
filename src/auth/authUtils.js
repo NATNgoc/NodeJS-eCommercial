@@ -37,11 +37,11 @@ const authentication = async (req, res, next) => {
         return next()
     }
 
-    await handleForAccessToken(keyStore, req.headers[HEADER.autherization], req.headers[HEADER.client_id])
+    await checkAccessToken(keyStore, req.headers[HEADER.autherization], req.headers[HEADER.client_id])
     return next()
 }
 
-const handleForAccessToken = async (keyStore, jwtToken, userId) => {
+const checkAccessToken = async (keyStore, jwtToken, userId) => {
 
     //check accessToken
     if (!jwtToken) throw new errorHandler.ForBiddenRequestError("Not find jwtToken")
@@ -50,9 +50,10 @@ const handleForAccessToken = async (keyStore, jwtToken, userId) => {
     const publicKeyObject = await createPublicKeyObject(keyStore.publicKey);
     try {
         const decodeShop = await jwt.verify(accessToken, publicKeyObject)
+        console.log("Decode shope", decodeShop)
         if (decodeShop.userid !== userId) throw new errorHandler.AuthError('invalid user id')
     } catch (error) {
-        throw new errorHandler.AuthError("invalid access token")
+        throw new errorHandler.AuthError("invalid access token123")
     }
 }
 
@@ -78,6 +79,8 @@ const getAccessTokenFromJWT = (JWT) => {
 const createPublicKeyObject = async (publicKeyString) => {
     return await crypto.createPublicKey(publicKeyString)
 }
+
 module.exports = {
+    HEADER,
     authentication
 }

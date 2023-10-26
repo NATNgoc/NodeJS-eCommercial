@@ -50,10 +50,10 @@ const checkAccessToken = async (keyStore, jwtToken, userId) => {
     const publicKeyObject = await createPublicKeyObject(keyStore.publicKey);
     try {
         const decodeShop = await jwt.verify(accessToken, publicKeyObject)
-        console.log("Decode shope", decodeShop)
+        console.log("Decode shoppee", decodeShop)
         if (decodeShop.userid !== userId) throw new errorHandler.AuthError('invalid user id')
     } catch (error) {
-        throw new errorHandler.AuthError("invalid access token123")
+        throw new errorHandler.AuthError("invalid access token123", error)
     }
 }
 
@@ -67,8 +67,8 @@ const handleForRefreshToken = async (keyStore, req) => {
         req.keyStore = keyStore
         req.shop = decodeShop
         req.refreshToken = refreshToken
-    } catch {
-        throw new errorHandler.AuthError('invalide refreshToken')
+    } catch (error) {
+        throw error
     }
 }
 

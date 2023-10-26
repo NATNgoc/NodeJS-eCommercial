@@ -11,6 +11,7 @@ const roles = {
     WRITER: 'WRITER',
     ADMIN: 'ADMIN'
 }
+const { actionTokenService } = require('../utils/index')
 //----------------MAIN SERVICE FUNCTION--------------------------------------
 class AccessService {
 
@@ -44,7 +45,7 @@ class AccessService {
     static refreshToken = async (keyStore, refreshToken, shop) => {
         const currentShop = await isValidateForRefreshToken(keyStore, refreshToken, shop)
         if (!utils.isEmptyObject(currentShop)) {
-            return await handleRefresingToken(shop, keyStore)
+            return await handleRefresingToken(currentShop, keyStore)
         }
         throw new errorHanlder.NotFoundError('Something went wrong')
     }
@@ -52,12 +53,15 @@ class AccessService {
 }
 //----------------SUB SERVICE FUNCTION--------------------------------------
 async function handleRefresingToken(shop, keyStore) {
-    const usedRefreshToken = keyStore.refreshToken
-    const { accessToken, refreshToken } = await TokenService.genToken(shop)
+    const { accessToken, refreshToken } = await TokenService.genToken(shop, actionTokenService["REFRESH_TOKEN"], keyStore)
     console.log("Key store", keyStore)
     return {
-        message: "hehee"
+        accessToken, refreshToken
     }
+}
+
+async function updateRefreshToken() {
+
 }
 
 async function isValidateForRefreshToken(keyStore, refreshToken, shop) {

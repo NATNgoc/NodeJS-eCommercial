@@ -3,13 +3,16 @@ const crypto = require('crypto')
 const tokenModel = require('../models/token.model')
 const jwt = require('jsonwebtoken')
 const shopModel = require('../models/shop.model')
+const { isEmptyObject } = require('../utils/index')
 const { Mongoose, Types } = require('mongoose')
+const { actionTokenService } = require('../utils/index')
 class TokenService {
-    static genToken = async (shop) => {
+    static genToken = async (shop, action = actionTokenService["CREATE_NEW_TOKEN"], keyStore = null) => {
         //create publickey , private
         //Luu keypublic vao db
         //sign Token bang private key
         const { privateKey, publicKey } = await this.genPubicAndPrivateKey()
+        console.log("Shop", shop)
         const { accessToken, refreshToken } = await this.createPairToken(
             {
                 userid: shop._id,
@@ -25,13 +28,33 @@ class TokenService {
                 expiresIn: '7days'
             }
         )
-        await this.updateTokenKey(shop._id, publicKey, refreshToken)
+        if (action == actionTokenService["CREATE_NEW_TOKEN"]) {
+            await this.updateNewTokenKey(shop._id, publicKey, refreshToken)
+        } else {
+            await this.updateRefreshTokenKey(keyStore, publicKey, refreshToken)
+        }
         return {
             accessToken,
             refreshToken
         }
 
 
+    }
+
+    static async updateRefreshTokenKey(keyStore, publicKeyNew, refreshToken) {
+        const publicKeyString = publicKeyNew.toString()
+        const refreshKeyString = refreshToken.toString()
+        const refreshUsedToken = keyStore.refreshToken
+        const filter = { _id: new Types.ObjectId(keyStore._id) }
+        await tokenModel.updateOne(filter, {
+            $set: {
+                publicKey: publicKeyString,
+                refreshToken: refreshKeyString
+            },
+            $addToSet: {
+                refreshTokenUsed: refreshUsedToken
+            }
+        })
     }
 
     static genPubicAndPrivateKey = async () => {
@@ -43,7 +66,7 @@ class TokenService {
         return { privateKey, publicKey }
     }
 
-    static async updateTokenKey(userId, publicKey, refreshKey) {
+    static async updateNewTokenKey(userId, publicKey, refreshKey) {
         const publicKeyString = publicKey.toString()
         const refreshKeyString = refreshKey.toString()
         const filter = { userid: new Types.ObjectId(userId) }
@@ -53,7 +76,7 @@ class TokenService {
             refreshToken: refreshKeyString,
             refreshTokenUsed: []
         }
-        const options = { upsert: true, new: true };
+        const options = { upsert: true };
         await tokenModel.findOneAndUpdate(filter, updateObject, options)
     }
 

@@ -58,8 +58,9 @@ var productSchema = new mongoose.Schema({
 });
 
 
-productSchema.pre('save', (next) => {
-    this.product_slug = slugify(this.product_name, { lower: true, trim: true })
+productSchema.pre('save', function (next) {
+    console.log(this.product_name)
+    this.product_slug = slugify(this.product_name, { lower: true })
     next()
 })
 

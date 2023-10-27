@@ -6,6 +6,7 @@ const errorHanlder = require('../../core/error.response')
 const initApiRoute = (app) => {
     router.use(errorHanlder.functionHanlder(authentication))
     router.post('/shop/product/createProduct', errorHanlder.functionHanlder(productController.createProduct))
+    router.post('/shop/product/drafts', errorHanlder.functionHanlder(productController.findAllDraftsProduct))
     return app.use('/api/v1', router)
 }
 

@@ -36,7 +36,7 @@ const checkIsValidShopId = async (shopId) => {
     if (!shopId) {
         throw new errorHandler.ForBiddenRequestError("invalid user id")
     }
-    await checkShopIsRegistered()
+    await checkShopIsRegistered(shopId)
 }
 
 const checkShopIsLogin = async (shopId) => {
@@ -66,7 +66,7 @@ const checkAccessToken = async (keyStore, jwtToken, userId) => {
         console.log("Decode shoppee", decodeShop)
         if (decodeShop.userid !== userId) throw new errorHandler.AuthError('invalid user id')
     } catch (error) {
-        throw new errorHandler.AuthError("invalid access token123", error)
+        throw new errorHandler.AuthError("invalid access token")
     }
 }
 

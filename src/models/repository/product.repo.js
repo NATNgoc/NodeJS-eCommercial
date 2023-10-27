@@ -19,7 +19,7 @@ class ProductRepository {
     }
 
     static async findAllProductByShopId(filter, limit, skip) {
-        return await productTypes[PRODUCT].find(filter)
+        return await productTypes["PRODUCT"].find({ ...filter })
             .populate('product_shop_id')
             .skip(skip)
             .limit(limit)

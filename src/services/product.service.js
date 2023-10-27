@@ -1,7 +1,8 @@
 
 
 const ProductRepository = require('../models/repository/product.repo')
-const ErrorResponse = require('../core/error.response')
+const ErrorResponse = require('../core/error.response');
+const { default: mongoose } = require('mongoose');
 
 class Product {
     constructor({ product_name, product_thumb, product_description, product_price,
@@ -91,7 +92,10 @@ class ProductService {
         return await ProductFactory.createProduct(type, payload)
     }
     static findAllDraftsProduct = async (productShopId, currentPage) => {
-
+        const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isDraft: true }
+        const limit = 60
+        const skip = currentPage * limit
+        return await ProductRepository.findAllProductByShopId(filter, limit, skip)
     }
 }
 

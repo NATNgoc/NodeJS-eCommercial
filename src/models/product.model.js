@@ -1,4 +1,5 @@
 const mongoose = require('mongoose'); // Erase if already required
+const slugify = require('slugify')
 const PRODUCT_COLLECTION_NAME = 'products'
 const PRODCUT_DOCUMENTS_NAME = 'product'
 const CLOTHING_COLLECTION_NAME = 'clothings'
@@ -25,6 +26,9 @@ var productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    product_slug: {
+        type: String
+    },
     product_type: {
         type: String,
         required: true,
@@ -33,11 +37,31 @@ var productSchema = new mongoose.Schema({
     product_shop_id: {
         type: mongoose.Types.ObjectId,
         required: true
+    },
+    isDraft: {
+        type: Boolean,
+        default: true,
+        required: true,
+        select: false,
+        index: true
+    },
+    isPublish: {
+        type: Boolean,
+        default: false,
+        required: true,
+        select: false,
+        index: true
     }
 }, {
     collection: PRODUCT_COLLECTION_NAME,
     timestamps: true
 });
+
+
+productSchema.pre('save', (next) => {
+    this.product_slug = slugify(this.product_name, { lower: true, trim: true })
+    next()
+})
 
 var clothingSchema = new mongoose.Schema({
     brand: {

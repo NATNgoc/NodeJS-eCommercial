@@ -146,4 +146,4 @@ async function hashStringByBcrypt(string) {
     return await bcrypt.hash(string, 10)
 }
 
-module.exports = AccessService
+module.exports = { AccessService, isRegisteredShop }

@@ -18,6 +18,15 @@ class ProductRepository {
         return await model.create({ ...object })
     }
 
+    static async findAllProductByShopId(filter, limit, skip) {
+        return await productTypes[PRODUCT].find(filter)
+            .populate('product_shop_id')
+            .skip(skip)
+            .limit(limit)
+            .lean()
+            .exec()
+    }
+
 }
 
 module.exports = ProductRepository

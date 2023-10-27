@@ -8,37 +8,50 @@ const HEADER = {
     autherization: 'authorization',
     refreshToken: 'x-rtoken-id'
 }
-
+const ShopRepository = require('../models/repository/shop.repo')
+const TokenRepository = require('../models/repository/token.repo')
 
 const authentication = async (req, res, next) => {
     /*
-    1 - check userId && accesstoken
-    2 - check keystore (Kiểm tra người dùng đăng nhập hay chưa)
-    3 - get access token
-    4 - verify token by publickey
+    1 - check valid userId
+    2- check keyStore
+    3 - hanlde for refreshToken Or accessToken
     */
 
-    //check userID
-    if (!req.headers[HEADER.client_id]) {
-        throw new errorHandler.ForBiddenRequestError("invalid user id")
-    }
+    await checkIsValidShopId(req.headers[HEADER.client_id])
 
-    //check Keystore
-    const keyStore = await TokenService.findByShopId(req.headers[HEADER.client_id])
-    console.log(keyStore)
-    if (!keyStore) {
-        throw new errorHandler.AuthError("User isn't login!")
-    }
+    const keyStore = await checkShopIsLogin(req.headers[HEADER.client_id])
     req.keyStore = keyStore
 
     //check if it's for refreshToken task
     if (req.headers[HEADER.refreshToken]) {
-        await handleForRefreshToken(keyStore, req)
-        return next()
+        await checkRefreshToken(keyStore, req)
+    } else {
+        await checkAccessToken(keyStore, req.headers[HEADER.autherization], req.headers[HEADER.client_id])
     }
-
-    await checkAccessToken(keyStore, req.headers[HEADER.autherization], req.headers[HEADER.client_id])
     return next()
+}
+
+const checkIsValidShopId = async (shopId) => {
+    if (!shopId) {
+        throw new errorHandler.ForBiddenRequestError("invalid user id")
+    }
+    await checkShopIsRegistered()
+}
+
+const checkShopIsLogin = async (shopId) => {
+    const keyStore = await TokenRepository.findKeyStoreByShopId(shopId)
+    if (!keyStore) {
+        throw new errorHandler.AuthError("User isn't login!")
+    }
+    return keyStore
+}
+
+const checkShopIsRegistered = async (shopId) => {
+    let currentShop = await ShopRepository.findShopById(shopId)
+    if (!currentShop) {
+        throw new errorHandler.AuthError("Shop isn't registered")
+    }
 }
 
 const checkAccessToken = async (keyStore, jwtToken, userId) => {
@@ -57,7 +70,7 @@ const checkAccessToken = async (keyStore, jwtToken, userId) => {
     }
 }
 
-const handleForRefreshToken = async (keyStore, req) => {
+const checkRefreshToken = async (keyStore, req) => {
     try {
         const refreshToken = req.headers[HEADER.refreshToken]
         const userId = req.headers[HEADER.client_id]

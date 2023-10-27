@@ -1,6 +1,5 @@
 
 
-
 const ProductRepository = require('../models/repository/product.repo')
 const ErrorResponse = require('../core/error.response')
 
@@ -90,6 +89,9 @@ class ProductService {
     static createProduct = async (payload) => {
         const type = payload.product_type
         return await ProductFactory.createProduct(type, payload)
+    }
+    static findAllDraftsProduct = async (productShopId, currentPage) => {
+
     }
 }
 

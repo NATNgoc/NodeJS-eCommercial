@@ -62,6 +62,10 @@ const handleForRefreshToken = async (keyStore, req) => {
         const refreshToken = req.headers[HEADER.refreshToken]
         const userId = req.headers[HEADER.client_id]
         const publicKeyObject = await createPublicKeyObject(keyStore.publicKey);
+        if (keyStore.refreshTokenUsed.includes(refreshToken)) {
+            await TokenService.removeTokenById(keyStore._id)
+            throw new errorHandler.ForBiddenRequestError('For security! pls login again')
+        }
         const decodeShop = await jwt.verify(refreshToken, publicKeyObject)
         if (decodeShop.userid !== userId) throw new errorHandler.AuthError('invalid userId')
         req.keyStore = keyStore

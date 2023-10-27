@@ -2,17 +2,16 @@
 const crypto = require('crypto')
 const tokenModel = require('../models/token.model')
 const jwt = require('jsonwebtoken')
-const shopModel = require('../models/shop.model')
-const { isEmptyObject } = require('../utils/index')
-const { Mongoose, Types } = require('mongoose')
+const { Types } = require('mongoose')
 const { actionTokenService } = require('../utils/index')
+
+
 class TokenService {
-    static genToken = async (shop, action = actionTokenService["CREATE_NEW_TOKEN"], keyStore = null) => {
+    static genToken = async (shop, action = actionTokenService["CREATE_NEW_TOKEN"], keyStoreForRefreshToken = null) => {
         //create publickey , private
         //Luu keypublic vao db
         //sign Token bang private key
         const { privateKey, publicKey } = await this.genPubicAndPrivateKey()
-        console.log("Shop", shop)
         const { accessToken, refreshToken } = await this.createPairToken(
             {
                 userid: shop._id,
@@ -28,23 +27,21 @@ class TokenService {
                 expiresIn: '7days'
             }
         )
-        if (action == actionTokenService["CREATE_NEW_TOKEN"]) {
-            await this.updateNewTokenKey(shop._id, publicKey, refreshToken)
+        if (isGenerateForRefreshToken(action)) {
+            await this.updateRefreshTokenKey(keyStoreForRefreshToken, publicKey, refreshToken)
         } else {
-            await this.updateRefreshTokenKey(keyStore, publicKey, refreshToken)
+            await this.updateNewTokenKey(shop._id, publicKey, refreshToken)
         }
         return {
             accessToken,
             refreshToken
         }
-
-
     }
 
     static async updateRefreshTokenKey(keyStore, publicKeyNew, refreshToken) {
         const publicKeyString = publicKeyNew.toString()
         const refreshKeyString = refreshToken.toString()
-        const refreshUsedToken = keyStore.refreshToken
+        const refreshUsedToken = keyStore.refreshToken //keyStore này được truyền trong authentication
         const filter = { _id: new Types.ObjectId(keyStore._id) }
         await tokenModel.updateOne(filter, {
             $set: {
@@ -59,7 +56,7 @@ class TokenService {
 
     static genPubicAndPrivateKey = async () => {
         const { privateKey, publicKey } = await crypto.generateKeyPairSync('rsa', {
-            modulusLength: 4096, // Độ mạnh của thuật toán generateKey
+            modulusLength: 2048, // Độ mạnh của thuật toán generateKey
             publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
             privateKeyEncoding: { type: 'pkcs1', format: 'pem' }
         })
@@ -77,6 +74,7 @@ class TokenService {
             refreshTokenUsed: []
         }
         const options = { upsert: true };
+
         await tokenModel.findOneAndUpdate(filter, updateObject, options)
     }
 
@@ -107,6 +105,10 @@ class TokenService {
     }
 }
 
+
+const isGenerateForRefreshToken = (action) => {
+    return action === actionTokenService["REFRESH_TOKEN"]
+}
 
 module.exports = TokenService
 

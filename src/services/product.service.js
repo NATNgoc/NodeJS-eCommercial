@@ -1,13 +1,9 @@
-const { productModel,
-    clothingModel,
-    electronicModel } = require('../models/product.model')
 
+
+
+const ProductRepository = require('../models/repository/product.repo')
 const ErrorResponse = require('../core/error.response')
 
-
-
-
-//-------------FACTORY PATTERN--------------------
 class Product {
     constructor({ product_name, product_thumb, product_description, product_price,
         product_quantity, product_type, product_attribute, product_shop_id }) {
@@ -23,7 +19,7 @@ class Product {
 
     async createProduct() {
 
-        return await productModel.create({
+        return await ProductRepository.createSpecificProductType("PRODUCT", {
             product_name: this.product_name,
             product_thumb: this.product_thumb,
             product_description: this.product_description,
@@ -41,7 +37,7 @@ class Clothing extends Product {
         const newProduct = await super.createProduct()
         if (!newProduct) throw ErrorResponse.ErrorResponse("Something went wrong! Check again")
 
-        const newClothingProduct = await clothingModel.create({ _id: newProduct._id, ...this.product_attribute, product_shop_id: this.product_shop_id })
+        const newClothingProduct = await ProductRepository.createSpecificProductType("CLOTHING", { _id: newProduct._id, ...this.product_attribute, product_shop_id: this.product_shop_id })
         if (!newClothingProduct) throw ErrorResponse.ErrorResponse("Something went wrong! Check again")
 
         return {
@@ -56,7 +52,7 @@ class Electronic extends Product {
         const newProduct = await super.createProduct()
         if (!newProduct) throw ErrorResponse.ErrorResponse("Something went wrong! Check your network")
 
-        const newElectronicProduct = await electronicModel.create({ _id: newProduct._id, ...this.product_attribute, product_shop_id: this.product_shop_id })
+        const newElectronicProduct = await ProductRepository.createSpecificProductType("ELECTRONIC", { _id: newProduct._id, ...this.product_attribute, product_shop_id: this.product_shop_id })
         if (!newElectronicProduct) throw ErrorResponse.ErrorResponse("Something went wrong! Check your network")
 
         return {
@@ -67,19 +63,28 @@ class Electronic extends Product {
 }
 
 
-
+//-------------FACTORY PATTERN--------------------
 class ProductFactory {
+
+    static registeredClassType = {}
+
+    static registerNewClassType = (type, classReference) => {
+        ProductFactory.registeredClassType[type] = classReference
+    }
+
     static async createProduct(type, payload) {
-        switch (type) {
-            case 'Electronic':
-                return new Electronic(payload).createProduct()
-            case 'Clothing':
-                return new Clothing(payload).createProduct()
-            default:
-                throw new ErrorResponse.NotFoundError("Not valid type of product")
+        const productClass = ProductFactory.registeredClassType[type]
+        if (!productClass) {
+            throw new ErrorResponse.NotFoundError("Not valid type of product")
         }
+        return await new ProductFactory.registeredClassType[type](payload).createProduct()
     }
 }
+//Registe all prodcuct class right here
+ProductFactory.registerNewClassType('Electronic', Electronic)
+ProductFactory.registerNewClassType('Clothing', Clothing)
+
+
 //-------------PRODUCT SERVICE--------------------
 class ProductService {
     static createProduct = async (payload) => {

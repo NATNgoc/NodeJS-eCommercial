@@ -4,7 +4,6 @@ const { getInfoData } = require('../utils')
 const TokenService = require('./token.service')
 const bcrypt = require('bcrypt')
 const errorHanlder = require('../core/error.response')
-const tokenModel = require('../models/token.model')
 const utils = require('../utils/index')
 const roles = {
     SHOP: 'SHOP',
@@ -60,12 +59,8 @@ async function handleRefresingToken(shop, keyStore) {
     }
 }
 
-async function updateRefreshToken() {
-
-}
-
 async function isValidateForRefreshToken(keyStore, refreshToken, shop) {
-    const { userid, email } = shop
+    const { email } = shop
     //check refreshToken đã sử dụng chưa
     if (isUsedRefreshToken(keyStore, refreshToken)) {
         await hanldeForUsedRefreshToken(keyStore)
@@ -139,8 +134,9 @@ async function isCorrectPassword(password, correctPassword) {
 
 
 async function isRegisteredShop(email) {
-    const currentShop = await shopModel.findOne({ email }).select({ _id: 1, name: 1, email: 1, password: 1 }).lean() || {}
-    if (utils.isEmptyObject(currentShop)) {
+    // const currentShop = await shopModel.findOne({ email }).select({ _id: 1, name: 1, email: 1, password: 1 }).lean() || {}
+    const currentShop = await shopService.findByEmail(email)
+    if (!currentShop) {
         return false
     }
     return currentShop;

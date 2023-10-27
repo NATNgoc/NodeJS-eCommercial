@@ -51,7 +51,8 @@ var clothingSchema = new mongoose.Schema({
     material: String,
     product_shop_id: {
         type: mongoose.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'shops'
     }
 }, {
     collection: CLOTHING_COLLECTION_NAME,
@@ -73,7 +74,8 @@ var electionicSchema = new mongoose.Schema({
     },
     product_shop_id: {
         type: mongoose.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'shops'
     }
 }, {
     collection: ELECTIONIC_COLLECTION_NAME,

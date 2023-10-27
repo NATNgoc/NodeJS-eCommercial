@@ -1,11 +1,13 @@
 const shopModel = require('../models/shop.model')
 
-const findByEmail = async (email, select = { email: 1, password: 1, name: 1, status: 1, roles: 1 }) => {
-    return await shopModel.findOne({ email }).select(select).lean()
+
+
+class shopService {
+
+    async findByEmail(email, optionSelect = { email: 1, password: 1, name: 1, status: 1, roles: 1 }) {
+        return await shopModel.findOne({ email }).select(optionSelect).lean()
+    }
+
 }
 
-
-
-module.exports = {
-    findByEmail
-}
+module.exports = new shopService()

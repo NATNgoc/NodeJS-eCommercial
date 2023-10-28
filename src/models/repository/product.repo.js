@@ -7,6 +7,7 @@ const productTypes = {
 }
 
 class ProductRepository {
+
     /**
      * 
      * @param {*} type : "One type of productTypes"
@@ -18,6 +19,13 @@ class ProductRepository {
         return await model.create({ ...object })
     }
 
+    /**
+     * 
+     * @param {*} filter : "Field or criteria you want to find"
+     * @param {*} limit : "Limit the documents you want to see per time"
+     * @param {*} skip : "Pagination"
+     * @returns 
+     */
     static async findAllProductByShopId(filter, limit, skip) {
         return await productTypes["PRODUCT"].find({ ...filter })
             .populate('product_shop_id')
@@ -26,6 +34,12 @@ class ProductRepository {
             .lean()
             .exec()
     }
+
+    static updateProduct() {
+
+    }
+
+
 
 }
 

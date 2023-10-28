@@ -1,5 +1,5 @@
 const shopModel = require('../models/shop.model')
-const shopService = require('./shop.service')
+const ShopService = require('./shop.service')
 const { getInfoData } = require('../utils')
 const TokenService = require('./token.service')
 const bcrypt = require('bcrypt')
@@ -125,8 +125,7 @@ async function genTokenForShop(shop) {
 }
 
 async function isCorrectPassword(password, correctPassword) {
-    const match = await bcrypt.compare(password, correctPassword)
-    if (!match) {
+    if (!await bcrypt.compare(password, correctPassword)) {
         return false
     }
     return true
@@ -135,7 +134,7 @@ async function isCorrectPassword(password, correctPassword) {
 
 async function isRegisteredShop(email) {
     // const currentShop = await shopModel.findOne({ email }).select({ _id: 1, name: 1, email: 1, password: 1 }).lean() || {}
-    const currentShop = await shopService.findByEmail(email)
+    const currentShop = await ShopService.findByEmail(email)
     if (!currentShop) {
         return false
     }

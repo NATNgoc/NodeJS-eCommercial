@@ -64,7 +64,7 @@ const checkAccessToken = async (keyStore, jwtToken, userId) => {
     try {
         const decodeShop = await jwt.verify(accessToken, publicKeyObject)
         console.log("Decode shoppee", decodeShop)
-        if (decodeShop.userid !== userId) throw new errorHandler.AuthError('invalid user id')
+        if (decodeShop.userid !== userId) throw new errorHandler.AuthError('invalid userId') // Kiểm tra có đúng là jwt của shop đó không
     } catch (error) {
         throw new errorHandler.AuthError("invalid access token")
     }

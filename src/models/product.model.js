@@ -34,6 +34,10 @@ var productSchema = new mongoose.Schema({
         required: true,
         enum: ['Electronic', 'Clothing']
     },
+    product_variations: {
+        type: Array,
+        default: []
+    },
     product_shop_id: {
         type: mongoose.Types.ObjectId,
         required: true

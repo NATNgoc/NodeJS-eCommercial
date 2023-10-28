@@ -80,7 +80,7 @@ class ProductFactory {
         return await new ProductFactory.registeredClassType[type](payload).createProduct()
     }
 }
-//Registe all prodcuct class right here
+//Regist prodcuct class right here
 ProductFactory.registerNewClassType('Electronic', Electronic)
 ProductFactory.registerNewClassType('Clothing', Clothing)
 
@@ -91,12 +91,23 @@ class ProductService {
         const type = payload.product_type
         return await ProductFactory.createProduct(type, payload)
     }
-    static findAllDraftsProduct = async (productShopId, currentPage) => {
+    static findAllDraftsProducts = async (productShopId, currentPage) => {
         const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isDraft: true }
         const limit = 60
         const skip = currentPage * limit
         return await ProductRepository.findAllProductByShopId(filter, limit, skip)
     }
+    static findAllPublishProducts = async (productShopId, currentPage) => {
+        const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isPublish: true }
+        const limit = 60
+        const skip = currentPage * limit
+        return await ProductRepository.findAllProductByShopId(filter, limit, skip)
+    }
+
+    static publishProduct = async () => {
+
+    }
+
 }
 
 module.exports = ProductService

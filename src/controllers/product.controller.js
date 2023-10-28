@@ -13,7 +13,14 @@ class ProductController {
         const currentPage = req.query.page || 0
         return new SuccesResponse.OkResponse({
             message: "List of draft Product!",
-            metaData: await ProductService.findAllDraftsProduct(req.headers[HEADER.client_id], currentPage)
+            metaData: await ProductService.findAllDraftsProducts(req.headers[HEADER.client_id], currentPage)
+        }).send(res)
+    }
+    findAllPublishedProducts = async (req, res, next) => {
+        const currentPage = req.query.page || 0
+        return new SuccesResponse.OkResponse({
+            message: "List of publish Product!",
+            metaData: await ProductService.findAllPublishProducts(req.headers[HEADER.client_id], currentPage)
         }).send(res)
     }
 }

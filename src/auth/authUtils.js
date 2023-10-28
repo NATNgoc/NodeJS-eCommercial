@@ -12,6 +12,7 @@ const ShopRepository = require('../models/repository/shop.repo')
 const TokenRepository = require('../models/repository/token.repo')
 
 const authentication = async (req, res, next) => {
+    console.log("au nè")
     /*
     1 - check valid userId
     2- check keyStore

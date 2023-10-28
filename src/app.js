@@ -1,11 +1,8 @@
 const compression = require('compression')
 const express = require('express')
 const { default: helmet } = require('helmet')
-const { JsonWebTokenError } = require('jsonwebtoken')
 const morgan = require('morgan')
-const jwt = require('jsonwebtoken')
 const app = express()
-const TokenService = require('./services/token.service')
 
 //init db
 require('./dbs/init.mongdb')
@@ -14,10 +11,7 @@ app.use(morgan('dev'))
 app.use(helmet())
 app.use(compression())
 app.use(express.json())
-//init access route
-require('./routes/access/index')(app)
-//init product route
-require('./routes/shop/index')(app)
+require('./routes/api.index')(app)
 
 // hanlde error
 app.use((req, res, next) => {

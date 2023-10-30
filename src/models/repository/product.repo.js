@@ -1,4 +1,5 @@
 
+const { default: mongoose } = require('mongoose')
 const availableProductModels = require('../product.model')
 const productTypes = {
     PRODUCT: availableProductModels.productModel,
@@ -26,7 +27,7 @@ class ProductRepository {
      * @param {*} skip : "Pagination"
      * @returns 
      */
-    static async findAllProductByShopId(filter, limit, skip) {
+    static async findAllProduct(filter, limit, skip) {
         return await productTypes["PRODUCT"].find({ ...filter })
             .populate('product_shop_id')
             .skip(skip)
@@ -35,8 +36,11 @@ class ProductRepository {
             .exec()
     }
 
-    static updateProduct() {
-
+    static async updateProductByShopId(productId, shopId, udpateObject) {
+        return await productTypes["PRODUCT"].findOneAndUpdate({
+            _id: new mongoose.Types.ObjectId(productId),
+            product_shop_id: new mongoose.Types.ObjectId(shopId)
+        }, udpateObject)
     }
 
 

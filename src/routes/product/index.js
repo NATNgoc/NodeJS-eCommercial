@@ -6,8 +6,10 @@ const errorHanlder = require('../../core/error.response')
 
 router.use(errorHanlder.functionHanlder(authentication))
 router.post('/createProduct', errorHanlder.functionHanlder(productController.createProduct))
-router.post('/drafts', errorHanlder.functionHanlder(productController.findAllDraftsProduct))
-router.post('/publishes', errorHanlder.functionHanlder(productController.findAllPublishedProducts))
+router.post('/drafts/all', errorHanlder.functionHanlder(productController.findAllDraftsProduct))
+router.post('/published/all', errorHanlder.functionHanlder(productController.findAllPublishedProducts))
+router.patch('/publish/:id', errorHanlder.functionHanlder(productController.publishProduct))
+
 
 
 module.exports = router

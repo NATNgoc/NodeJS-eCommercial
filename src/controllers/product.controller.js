@@ -23,6 +23,13 @@ class ProductController {
             metaData: await ProductService.findAllPublishProducts(req.headers[HEADER.client_id], currentPage)
         }).send(res)
     }
+    publishProduct = async (req, res, next) => {
+        const productId = req.params.id
+        return new SuccesResponse.OkResponse({
+            message: "Publish product succesfully!",
+            metaData: await ProductService.publishProduct(req.headers[HEADER.client_id], productId)
+        }).send(res)
+    }
 }
 
 module.exports = new ProductController()

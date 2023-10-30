@@ -87,6 +87,7 @@ ProductFactory.registerNewClassType('Clothing', Clothing)
 
 //-------------PRODUCT SERVICE--------------------
 class ProductService {
+
     static createProduct = async (payload) => {
         const type = payload.product_type
         return await ProductFactory.createProduct(type, payload)
@@ -95,17 +96,23 @@ class ProductService {
         const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isDraft: true }
         const limit = 60
         const skip = currentPage * limit
-        return await ProductRepository.findAllProductByShopId(filter, limit, skip)
+        return await ProductRepository.findAllProduct(filter, limit, skip)
     }
     static findAllPublishProducts = async (productShopId, currentPage) => {
         const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isPublish: true }
         const limit = 60
         const skip = currentPage * limit
-        return await ProductRepository.findAllProductByShopId(filter, limit, skip)
+        return await ProductRepository.findAllProduct(filter, limit, skip)
     }
 
-    static publishProduct = async () => {
-
+    static publishProduct = async (shopId, productId) => {
+        const result = await ProductRepository.updateProductByShopId(productId, shopId, {
+            isDraft: false,
+            isPublish: true
+        })
+        if (!result) {
+            throw new ErrorResponse.NotFoundError("Not found 404 error")
+        }
     }
 
 }

@@ -15,9 +15,19 @@ const actionTokenService = {
     REFRESH_TOKEN: "refresh"
 }
 
+const getSelectDataForQuery = (select) => {
+    return Object.fromEntries(select.map(it => [it, 1]))
+}
+
+const getUnselectDataForQuery = (select) => {
+    return Object.fromEntries(select.map(it => [it, 0]))
+}
+
 module.exports = {
     getInfoData,
     isEmptyObject,
     actionTokenService,
-    emailRegrex
+    emailRegrex,
+    getSelectDataForQuery,
+    getUnselectDataForQuery
 }

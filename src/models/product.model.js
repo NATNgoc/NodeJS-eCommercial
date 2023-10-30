@@ -40,6 +40,7 @@ var productSchema = new mongoose.Schema({
     },
     product_shop_id: {
         type: mongoose.Types.ObjectId,
+        ref: 'shop',
         required: true
     },
     isDraft: {
@@ -47,14 +48,12 @@ var productSchema = new mongoose.Schema({
         default: true,
         required: true,
         select: false,
-        index: true
     },
     isPublish: {
         type: Boolean,
         default: false,
         required: true,
         select: false,
-        index: true
     }
 }, {
     collection: PRODUCT_COLLECTION_NAME,
@@ -81,7 +80,7 @@ var clothingSchema = new mongoose.Schema({
     product_shop_id: {
         type: mongoose.Types.ObjectId,
         required: true,
-        ref: 'shops'
+        ref: 'shop'
     }
 }, {
     collection: CLOTHING_COLLECTION_NAME,
@@ -104,7 +103,7 @@ var electionicSchema = new mongoose.Schema({
     product_shop_id: {
         type: mongoose.Types.ObjectId,
         required: true,
-        ref: 'shops'
+        ref: 'shop'
     }
 }, {
     collection: ELECTIONIC_COLLECTION_NAME,

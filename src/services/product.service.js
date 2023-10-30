@@ -3,6 +3,10 @@
 const ProductRepository = require('../models/repository/product.repo')
 const ErrorResponse = require('../core/error.response');
 const { default: mongoose } = require('mongoose');
+const { getSelectDataForQuery, getUnselectDataForQuery } = require('../utils/index')
+
+
+const LIMIT_PER_PAGE = 60
 
 class Product {
     constructor({ product_name, product_thumb, product_description, product_price,
@@ -92,17 +96,23 @@ class ProductService {
         const type = payload.product_type
         return await ProductFactory.createProduct(type, payload)
     }
-    static findAllDraftsProducts = async (productShopId, currentPage) => {
-        const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isDraft: true }
-        const limit = 60
-        const skip = currentPage * limit
-        return await ProductRepository.findAllProduct(filter, limit, skip)
+
+    static findProductById = async ({ product_id }) => {
+        const unSelect = getUnselectDataForQuery(["__v", "isDraft", "isPublish", "createdAt", "updatedAt"])
+        return await ProductRepository.findProductById({ product_id, unSelect })
     }
-    static findAllPublishProducts = async (productShopId, currentPage) => {
+
+    static findAllDraftsProducts = async (productShopId, { page }) => {
+        const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isDraft: true }
+        const limit = limitProductPerPage
+        const skip = page * limit
+        return await ProductRepository.findProduct(filter, limit, skip)
+    }
+    static findAllPublishProducts = async (productShopId, { page }) => {
         const filter = { product_shop_id: new mongoose.Types.ObjectId(productShopId), isPublish: true }
-        const limit = 60
-        const skip = currentPage * limit
-        return await ProductRepository.findAllProduct(filter, limit, skip)
+        const limit = LIMIT_PER_PAGE
+        const skip = page * limit
+        return await ProductRepository.findProduct(filter, limit, skip)
     }
 
     static publishProduct = async (shopId, productId) => {
@@ -113,7 +123,44 @@ class ProductService {
         if (!result) {
             throw new ErrorResponse.NotFoundError("Not found 404 error")
         }
+        return result;
     }
+    static unPublishProduct = async (shopId, productId) => {
+        const result = await ProductRepository.updateProductByShopId(productId, shopId, {
+            isDraft: true,
+            isPublish: false
+        })
+        if (!result) {
+            throw new ErrorResponse.NotFoundError("Not found 404 error")
+        }
+        return result;
+    }
+
+    static searchProductByKeyword = async ({ keyword, page }) => {
+        keyword = keyword ? keyword : {}
+        page = page ? page : 0
+        // const regKeyword = RegExp(keyword)
+        const filter = {
+            isPublish: true,
+            $text: { $search: keyword },
+        }
+        const limit = LIMIT_PER_PAGE
+        const skip = page * limit
+        const sortOption = {
+            score: { $meta: "textScore" }
+        }
+        return await ProductRepository.findProduct(filter, limit, skip, sortOption)
+    }
+
+    static findAllProduct = async ({ sortBy = 'ctime', page = 0 }) => {
+        const limit = LIMIT_PER_PAGE
+        const filter = { isPublish: true }
+        const sortOption = (sortBy === 'ctime') ? { updatedAt: 1 } : { createdAt: 1 }
+        const skip = limit * page
+        const select = getSelectDataForQuery(["product_name", "product_thumb", "product_description", "product_price", "product_quantity", "product_type"])
+        return await ProductRepository.findAllProduct(filter, limit, skip, select, sortOption)
+    }
+
 
 }
 

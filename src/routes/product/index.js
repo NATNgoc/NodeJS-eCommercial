@@ -5,13 +5,14 @@ const router = express.Router()
 const errorHanlder = require('../../core/error.response')
 
 
-router.post('/search', errorHanlder.functionHanlder(productController.searchProductByKeyword))
+router.get('/search', errorHanlder.functionHanlder(productController.searchProductByKeyword))
 router.get('/', errorHanlder.functionHanlder(productController.findAllProduct))
 router.get('/:product_id', errorHanlder.functionHanlder(productController.findProductById))
 router.use(errorHanlder.functionHanlder(authentication))
-router.post('/createProduct', errorHanlder.functionHanlder(productController.createProduct))
-router.post('/drafts/all', errorHanlder.functionHanlder(productController.findAllDraftsProduct))
-router.post('/published/all', errorHanlder.functionHanlder(productController.findAllPublishedProducts))
+router.post('/create', errorHanlder.functionHanlder(productController.createProduct))
+router.patch('/update/:id', errorHanlder.functionHanlder(productController.updateProductById))
+router.get('/drafts/all', errorHanlder.functionHanlder(productController.findAllDraftsProduct))
+router.get('/published/all', errorHanlder.functionHanlder(productController.findAllPublishedProducts))
 router.patch('/publish/:id', errorHanlder.functionHanlder(productController.publishProduct))
 router.patch('/unPublish/:id', errorHanlder.functionHanlder(productController.unPublishProduct))
 

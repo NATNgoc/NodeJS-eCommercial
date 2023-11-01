@@ -1,23 +1,15 @@
 
 const { default: mongoose } = require('mongoose')
-const availableProductModels = require('../product.model')
-const productTypes = {
-    PRODUCT: availableProductModels.productModel,
-    CLOTHING: availableProductModels.clothingModel,
-    ELECTRONIC: availableProductModels.electronicModel
-}
+const productModel = require('../product.model')
 
 class ProductRepository {
 
     /**
      * 
-     * @param {*} type : "One type of productTypes"
      * @param {*} object : "Object want to create in db"
      */
-    static async createSpecificProductType(type, object) {
-        const model = productTypes[type]
-        if (!model) return false
-        return await model.create({ ...object })
+    static async createProduct(object) {
+        return await productModel.create({ ...object })
     }
 
     /**
@@ -28,13 +20,25 @@ class ProductRepository {
      * @returns 
      */
     static async findProduct(filter, limit, skip, sortOption = {}) {
-        return await productTypes["PRODUCT"].find({ ...filter })
+        return await productModel.find({ ...filter })
             .sort(sortOption)
             .populate('product_shop_id')
             .skip(skip)
             .limit(limit)
             .lean()
             .exec()
+    }
+
+
+    /**
+     * 
+     * @param {*} filter : "Field or criteria you want to update"
+     * @param {*} bodyUpdate : "The lastest updated content for the product"
+     * @param {*} isNew : "Is it attribute to decide whether it return the new value or not"
+     * @returns : "The new updated object if isNew parameter be true"
+     */
+    static async updateProduct(filter, bodyUpdate, isNew = true) {
+        return await productModel.findByIdAndUpdate(filter, bodyUpdate, { new: isNew });
     }
 
 
@@ -49,7 +53,7 @@ class ProductRepository {
      */
     static async findAllProduct(filter, limit, skip, select, sortOption = {}) {
         console.log("Hello")
-        return await productTypes["PRODUCT"].find({ ...filter })
+        return await productModel.find({ ...filter })
             .sort(sortOption)
             .skip(skip)
             .limit(limit)
@@ -62,7 +66,7 @@ class ProductRepository {
 
 
     static async findProductById({ product_id, unSelect }) {
-        return await productTypes["PRODUCT"]
+        return await productModel
             .findById(new mongoose.Types.ObjectId(product_id))
             .select(unSelect)
             .lean()
@@ -72,7 +76,7 @@ class ProductRepository {
 
 
     static async updateProductByShopId(productId, shopId, udpateObject) {
-        return await productTypes["PRODUCT"].findOneAndUpdate({
+        return await productModel.findOneAndUpdate({
             _id: new mongoose.Types.ObjectId(productId),
             product_shop_id: new mongoose.Types.ObjectId(shopId)
         }, udpateObject)

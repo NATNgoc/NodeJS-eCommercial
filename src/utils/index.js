@@ -46,6 +46,11 @@ const removeNullOrUnderfinedObject = (object) => {
     return object
 }
 
+function filterPayLoad(payload) {
+    const parseredPayload = nestedObjectParser(payload)
+    return removeNullOrUnderfinedObject(parseredPayload)
+}
+
 const objectIdParser = (objectId) => {
     return new mongoose.Types.ObjectId(objectId)
 }
@@ -73,5 +78,5 @@ module.exports = {
     nestedObjectParser,
     removeNullOrUnderfinedObject,
     objectIdParser,
-    filterFieldsByPrefix
+    filterPayLoad
 }

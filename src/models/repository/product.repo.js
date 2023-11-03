@@ -38,7 +38,12 @@ class ProductRepository {
      * @returns : "The new updated object if isNew parameter be true"
      */
     static async updateProduct(filter, bodyUpdate, isNew = true) {
-        return await productModel.findByIdAndUpdate(filter, bodyUpdate, { new: isNew });
+        return await productModel.findOneAndUpdate(filter,
+            {
+                $set:
+                    { ...bodyUpdate }
+            },
+            { new: isNew }).lean();
     }
 
 

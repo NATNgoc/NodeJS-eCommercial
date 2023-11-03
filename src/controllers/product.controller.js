@@ -16,6 +16,7 @@ class ProductController {
             metaData: await ProductService.updateProductById(req.body.product_type, req.params.id, req.headers[HEADER.client_id], req.body)
         }).send(res)
     }
+
     findAllDraftsProduct = async (req, res, next) => {
         const currentPage = req.query.page || 0
         return new SuccesResponse.OkResponse({

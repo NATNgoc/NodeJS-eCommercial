@@ -14,11 +14,11 @@ class ElectronnicRepository {
      * @returns : "The new updated object if isNew parameter be true"
      */
     static async updateElectronic(filter, bodyUpdate, isNew = true) {
-        return await electronicModel.updateMany(filter, {
+        return await electronicModel.findOneAndUpdate(filter, {
             $set: {
                 ...bodyUpdate
             }
-        }, { isNew: isNew })
+        }, { new: isNew }).lean()
     }
 
 }

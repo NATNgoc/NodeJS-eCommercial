@@ -16,7 +16,7 @@ class ClothingRepository {
     static async updateClothing(filter, bodyUpdate, isNew = true) {
         return await clothingModel.findOneAndUpdate(filter, {
             $set: { ...bodyUpdate }
-        }, { isNew: isNew })
+        }, { new: isNew }).lean()
     }
 
 

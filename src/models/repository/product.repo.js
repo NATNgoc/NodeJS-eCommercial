@@ -57,7 +57,6 @@ class ProductRepository {
      * @returns 
      */
     static async findAllProduct(filter, limit, skip, select, sortOption = {}) {
-        console.log("Hello")
         return await productModel.find({ ...filter })
             .sort(sortOption)
             .skip(skip)

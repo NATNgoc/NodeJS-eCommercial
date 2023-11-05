@@ -6,7 +6,7 @@ const { getSelectDataForQuery, getUnselectDataForQuery, removeNullOrUnderfinedOb
 const { Types } = require('mongoose/lib');
 const ProductFactory = require('../factories/Product Factory/product.factory')
 const InventoryService = require('../services/inventory.service')
-const LIMIT_PER_PAGE = 60
+const { LIMIT_PER_PAGE } = require('../utils/pagination.option')
 
 //-------------PRODUCT SERVICE--------------------
 class ProductService {

@@ -30,6 +30,12 @@ class NotFoundError extends ErrorResponse {
     }
 }
 
+class BadRequestError extends ErrorResponse {
+    constructor(message = reasonPhrases.BAD_REQUEST, status = statusCode.BAD_REQUEST) {
+        super(message, status)
+    }
+}
+
 class AuthError extends ErrorResponse {
     constructor(message = reasonPhrases.UNAUTHORIZED, status = statusCode.UNAUTHORIZED) {
         super(message, status)
@@ -54,6 +60,7 @@ module.exports = {
     ForBiddenRequestError,
     NotFoundError,
     AuthError,
+    BadRequestError,
     functionHanlder
 }
 

@@ -37,6 +37,11 @@ var discountSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    discont_used_count: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     discount_users_used: {
         type: Array,
         default: []

@@ -5,17 +5,18 @@ const ErrorResponse = require('../core/error.response');
 const { getSelectDataForQuery, getUnselectDataForQuery, removeNullOrUnderfinedObject, objectIdParser } = require('../utils/index');
 const { Types } = require('mongoose/lib');
 const ProductFactory = require('../factories/Product Factory/product.factory')
-
+const InventoryService = require('../services/inventory.service')
 const LIMIT_PER_PAGE = 60
 
 //-------------PRODUCT SERVICE--------------------
 class ProductService {
 
     static createProduct = async (payload) => {
-
-        const type = payload.product_type
-        const typeOfProduct = ProductFactory.getProduct(type)
-        return await new typeOfProduct(payload).createProduct()
+        const typeOfProduct = ProductFactory.getProduct(payload.product_type)
+        const newProduct = await new typeOfProduct(payload).createProduct()
+        console.log(newProduct)
+        await InventoryService.createNewInventory(newProduct.product.product_shop_id, newProduct.product._id, newProduct.product.product_quantity)
+        return newProduct
     }
 
     static findProductById = async ({ product_id }) => {

@@ -24,8 +24,8 @@ class Electronic extends Product {
         // check if the user is updating product_attribute
         if (!isEmptyObject(product_atrribute)) {
             return {
-                ...updatedProduct,
-                product_attribute: await this.updateElectronic(filter, product_atrribute)
+                product: updatedProduct,
+                product_attribute: await this.product_attribute
             }
         }
         return {

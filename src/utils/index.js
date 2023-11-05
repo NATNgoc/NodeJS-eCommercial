@@ -24,50 +24,31 @@ const getUnselectDataForQuery = (select) => {
     return Object.fromEntries(select.map(it => [it, 0]))
 }
 
+
+
+function filterPayLoad(payload) {
+    return nestedObjectParser(payload)
+}
 const nestedObjectParser = (object, parent = '', result = {}) => {
-    const currentParent = parent === '' ? parent : (parent + '.')
-    Object.keys(object).forEach(key => {
-        const prefix = currentParent + key
-        if (typeof object[key] == 'object' && !Array.isArray(object[key])) {
-            nestedObjectParser(object[key], currentParent + key, result)
-        } else {
-            result[prefix] = object[key]
-        }
-    })
+    if (object && typeof object === 'object') {
+        const currentParent = parent === '' ? parent : (parent + '.')
+        Object.keys(object).forEach(key => {
+            const prefix = currentParent + key
+            if (typeof object[key] == 'object' && !Array.isArray(object[key])) {
+                nestedObjectParser(object[key], currentParent + key, result)
+            } else {
+                result[prefix] = object[key] || null
+            }
+        })
+    }
     return result
 }
 
-const removeNullOrUnderfinedObject = (object) => {
-    Object.keys(object).forEach(key => {
-        if (!object[key]) {
-            delete object[key]
-        }
-    })
-    return object
-}
-
-function filterPayLoad(payload) {
-    const parseredPayload = nestedObjectParser(payload)
-    return removeNullOrUnderfinedObject(parseredPayload)
-}
 
 const objectIdParser = (objectId) => {
     return new mongoose.Types.ObjectId(objectId)
 }
 
-const filterFieldsByPrefix = (object, prefix) => {
-    const result = {};
-    const remaining = {};
-    Object.keys(object).forEach(key => {
-        if (key.startsWith(prefix)) {
-            result[key] = object[key];
-        } else {
-            remaining[key] = object[key];
-        }
-    });
-
-    return { result, remaining };
-};
 module.exports = {
     getInfoData,
     isEmptyObject,
@@ -76,7 +57,6 @@ module.exports = {
     getSelectDataForQuery,
     getUnselectDataForQuery,
     nestedObjectParser,
-    removeNullOrUnderfinedObject,
     objectIdParser,
     filterPayLoad
 }

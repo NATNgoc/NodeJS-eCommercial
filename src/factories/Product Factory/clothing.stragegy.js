@@ -12,7 +12,7 @@ class Clothing extends Product {
 
         return {
             product: newProduct,
-            ...this.product_attribute
+            product_attribute: this.product_attribute
         }
     }
 
@@ -24,7 +24,7 @@ class Clothing extends Product {
         // check if the user is updating product_attribute
         if (!isEmptyObject(product_atrribute)) {
             return {
-                ...updatedProduct,
+                product: updatedProduct,
                 product_attribute: await this.updatedClothing(filter, product_atrribute)
             }
         }

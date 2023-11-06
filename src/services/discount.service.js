@@ -14,6 +14,8 @@ const findAvalibleProductForDiscount = {
 
 
 
+
+
 //----------------------SUB FUNCTION--------------------
 
 async function checkExistingCode(shopId, code) {
@@ -49,6 +51,68 @@ async function getProductForSpecific(sortBy, page, limit, shopId, discountProduc
     const sortOption = sortBy === 'ctime' ? { createdAt: -1 } : { createdAt: 1 }
     const skip = LIMIT_PER_PAGE * page
     return await ProductRepository.findAllProduct(filter, limit, skip, getUnselectDataForQuery(unSelectField), sortOption)
+}
+
+async function checkDateCode(currentDate, endDate, discountCodeId, shopId) {
+    const result = currentDate > endDate
+    if (!result) {
+        await DiscountRepository.disableDiscountCode(discountCodeId, shopId)
+        throw new ErrorResponse.BadRequestError("Discoutn code is Expired")
+    }
+}
+
+async function isUserStillHasTurn(userId, usedUserIds, maxTurn) {
+    const usedCountOfUser = usedUserIds.reduce((count, currentUserId) => (currentUserId === userId ? count + 1 : count), 0);
+    return usedCountOfUser === maxTurn
+}
+
+function checkCodeIsActive(status) {
+    if (!status) throw new ErrorResponse.BadRequestError("Discountcode is exprired")
+}
+
+function checkStillHaveDiscountTurn(remainingTurn) {
+    if (remainingTurn === 0) throw new ErrorResponse.BadRequestError("Discount code turn is over")
+}
+
+function checkUserHaveEnoughTurn(maxTurnPerUser, usedUserIds, userId) {
+    if (maxTurnPerUser !== 0) {
+        if (!isUserStillHasTurn(userId, usedUserIds, maxTurnPerUser)) {
+            throw new ErrorResponse.BadRequestError("User no longer has a turn")
+        }
+    }
+}
+
+function checkValidProductForDiscount(productId, typeApply, availibleProductIds) {
+    if (typeApply === 'specific') {
+        if (!IsValidProductForDiscount(productId, availibleProductIds)) {
+            throw new ErrorResponse.BadRequestError("product is not in range for discount")
+        }
+    }
+}
+
+function IsValidProductForDiscount(produductId, availableProductIds) {
+    return availableProductIds.includes(produductId)
+}
+
+function checkTotalPriceWithMinimumValue(totalValue, minimumValue) {
+    if (totalValue < minimumValue) {
+        throw new ErrorResponse.BadRequestError("Total Price is under minimum value of this discount")
+    }
+}
+
+async function isValidateForApplyCode(userId, code, shopId, products) {
+    const currentCode = await findExistingCode(shopId, code)
+    const { productId, price, quantity } = products
+    const totalPrice = price * quantity
+
+    checkCodeIsActive(currentCode.discount_is_active)
+    await checkDateCode(new Date(), new Date(currentCode.discount_end_at), currentCode._id, shopId)
+    checkStillHaveDiscountTurn(currentCode.discount_max_uses)
+    checkUserHaveEnoughTurn(currentCode.discount_max_use_per_user, currentCode.discount_users_used, userId)
+    checkValidProductForDiscount(productId, currentCode.discount_apply_for, currentCode.discount_product_ids)
+    checkTotalPriceWithMinimumValue(totalPrice, currentCode.discount_min_order_value)
+
+    return true
 }
 //---------------------------------------------------------------------
 /*
@@ -94,6 +158,27 @@ class DiscountService {
         return await DiscountRepository.findDiscountCode(filter, limit, skip, getUnselectDataForQuery(unSelectField), sortOption)
     }
 
+
+    /**
+     * 
+     * @param {*} userId : "Userid that person is want to use discount code"
+     * @param {*} code : "The discount code"
+     * @param {*} shopId :"The id of the shop that issued this discount code"
+     * @param {*} products : "It is object include productId, price and quantity"
+     */
+    static async applyDiscountCodeForProduct(userId, code, shopId, products) {
+        const { price, quantity } = products
+        const totalPrice = price * quantity
+        if ((await isValidateForApplyCode(userId, code, shopId, products))) {
+            const totalDiscountPrice = currentCode.discount_type === 'specific' ? (totalPrice * currentCode.discount_value / 100) : currentCode.discount_value
+            return {
+                "Discounted Price": totalDiscountPrice,
+                "Initial Price": totalPrice,
+                "Final Price: ": totalPrice - totalDiscountPrice
+            }
+        }
+        throw ErrorResponse.ErrorResponse("Something went wrong!!")
+    }
 
 
 

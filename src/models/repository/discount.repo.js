@@ -37,6 +37,17 @@ class DiscountRepository {
             .exec()
     }
 
+    static async disableDiscountCode(discountCodeId, shopId) {
+        return await discountModel.findOneAndUpdate({
+            _id: objectIdParser(discountCodeId),
+            discount_shop_id: objectIdParser(shopId)
+        }, {
+            $set: {
+                discount_is_active: false
+            }
+        }).lean()
+    }
+
 }
 
 module.exports = DiscountRepository

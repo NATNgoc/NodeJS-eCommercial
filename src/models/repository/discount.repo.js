@@ -27,6 +27,16 @@ class DiscountRepository {
             .exec()
     }
 
+    static async findDiscountCode(filter, limit, skip, selectOption, sortOption = {}) {
+        return discountModel.find(filter)
+            .skip(skip)
+            .limit(limit)
+            .select(selectOption)
+            .sort(sortOption)
+            .lean()
+            .exec()
+    }
+
 }
 
 module.exports = DiscountRepository

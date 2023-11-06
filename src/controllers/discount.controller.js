@@ -18,6 +18,14 @@ class DiscountController {
             metaData: await DiscountService.getAllProductByDiscountCode({ ...req.query }, req.params.discountCode, req.headers[HEADER.client_id])
         }).send(res)
     }
+
+    findAllDiscountCodeForShop = async (req, res, next) => {
+        return new SuccesResponse.OkResponse({
+            ...req.body,
+            message: "All code of id::" + req.headers[HEADER.client_id],
+            metaData: await DiscountService.getAllDiscountCodeForShop({ ...req.query }, req.headers[HEADER.client_id])
+        }).send(res)
+    }
 }
 const discountController = new DiscountController()
 module.exports = discountController

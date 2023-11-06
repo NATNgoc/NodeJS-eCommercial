@@ -58,10 +58,10 @@ class ProductRepository {
      */
     static async findAllProduct(filter, limit, skip, select, sortOption = {}) {
         return await productModel.find({ ...filter })
-            .sort(sortOption)
             .skip(skip)
             .limit(limit)
             .select(select)
+            .sort(sortOption)
             .lean()
             .exec()
     }

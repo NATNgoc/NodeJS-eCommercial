@@ -45,8 +45,6 @@ const validateCreateDiscountCode = async (req, res, next) => {
     if (discount_apply_for === "specific") {
         if (discount_product_ids.length === 0) {
             throw new ErrorResponse.BadRequestError("Invalid discount list of specific product for discount")
-        } else {
-            req.body.discount_product_ids = await discount_product_ids.map(value => objectIdParser(value))
         }
     }
     next()

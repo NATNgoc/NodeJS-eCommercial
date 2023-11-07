@@ -46,8 +46,21 @@ const validateCreateDiscountCode = async (req, res, next) => {
         if (discount_product_ids.length === 0) {
             throw new ErrorResponse.BadRequestError("Invalid discount list of specific product for discount")
         }
+    } else {
+        if (discount_product_ids.length > 0) {
+            throw new ErrorResponse.BadRequestError("Because of all product dont push any id in discount list ids")
+        }
+    }
+
+    next()
+}
+
+const validateDeleteDiscountCode = (req, res, next) => {
+    const { codeId, shopId } = req.body
+    if (!codeId || !shopId) {
+        throw new ErrorResponse.BadRequestError("Invalid input")
     }
     next()
 }
 
-module.exports = { validateCreateDiscountCode }
+module.exports = { validateCreateDiscountCode, validateDeleteDiscountCode }

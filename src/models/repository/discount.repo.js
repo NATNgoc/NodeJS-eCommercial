@@ -5,20 +5,24 @@ const { objectIdParser } = require('../../utils')
 class DiscountRepository {
 
     static async foundDiscountCodeByShopId(shopId, code) {
-        return discountModel.findOne({
+        return await discountModel.findOne({
             discount_shop_id: objectIdParser(shopId),
             discount_code: code
         }).lean()
     }
 
 
+    static async deleteDiscount(filter) {
+        return await discountModel.findOneAndDelete({ ...filter })
+    }
+
     static async createNewDiscountCode(payload) {
         console.log(payload)
-        return discountModel.create({ ...payload })
+        return await discountModel.create({ ...payload })
     }
 
     static async findAllProduct(filter, limit, skip, selectOption, sortOption = {}) {
-        return discountModel.find(filter)
+        return await discountModel.find(filter)
             .skip(skip)
             .limit(limit)
             .select(selectOption)
@@ -28,7 +32,7 @@ class DiscountRepository {
     }
 
     static async findDiscountCode(filter, limit, skip, selectOption, sortOption = {}) {
-        return discountModel.find(filter)
+        return await discountModel.find(filter)
             .skip(skip)
             .limit(limit)
             .select(selectOption)

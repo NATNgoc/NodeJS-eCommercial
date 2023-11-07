@@ -4,9 +4,9 @@ const router = express.Router()
 
 
 const initApiRoute = (app) => {
-    router.use('/shop', require('./access/index'))
-    router.use('/product', require('./product/index'))
-    router.use('/discount', require('./discount/index'))
+    router.use('/shops', require('./access/index'))
+    router.use('/products', require('./product/index'))
+    router.use('/discounts', require('./discount/index'))
     return app.use("/api/v1", router)
 }
 

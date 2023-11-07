@@ -15,7 +15,7 @@ class DiscountController {
         return new SuccesResponse.OkResponse({
             ...req.body,
             message: "Create code succesfully",
-            metaData: await DiscountService.getAllProductByDiscountCode({ ...req.query }, req.params.discountCode, req.headers[HEADER.client_id])
+            metaData: await DiscountService.getAllProductByDiscountCode({ ...req.query }, req.query.code, req.query.shopId)
         }).send(res)
     }
 
@@ -24,6 +24,14 @@ class DiscountController {
             ...req.body,
             message: "All code of id::" + req.headers[HEADER.client_id],
             metaData: await DiscountService.getAllDiscountCodeForShop({ ...req.query }, req.headers[HEADER.client_id])
+        }).send(res)
+    }
+
+    applyDiscountCode = async (req, res, next) => {
+        return new SuccesResponse.OkResponse({
+            ...req.body,
+            message: "Use code succesfully",
+            metaData: await DiscountService.applyDiscountCodeForProduct({ ...req.body })
         }).send(res)
     }
 }

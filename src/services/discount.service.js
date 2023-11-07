@@ -11,11 +11,6 @@ const findAvalibleProductForDiscount = {
     all: getProductForAll,
     specific: getProductForSpecific
 }
-
-
-
-
-
 //----------------------SUB FUNCTION--------------------
 
 async function checkExistingCode(shopId, code) {
@@ -28,7 +23,6 @@ async function findExistingCode(shopId, code) {
     if (!discountCode) throw new ErrorResponse.BadRequestError("Discount code is not exsited")
     return discountCode
 }
-
 
 async function getProductForAll(sortBy, page, limit, shopId, discountProductIds = []) {
     const filter = {
@@ -55,9 +49,9 @@ async function getProductForSpecific(sortBy, page, limit, shopId, discountProduc
 
 async function checkDateCode(currentDate, endDate, discountCodeId, shopId) {
     const result = currentDate > endDate
-    if (!result) {
+    if (result) {
         await DiscountRepository.disableDiscountCode(discountCodeId, shopId)
-        throw new ErrorResponse.BadRequestError("Discoutn code is Expired")
+        throw new ErrorResponse.BadRequestError("Discount code is Expired")
     }
 }
 
@@ -112,7 +106,7 @@ async function isValidateForApplyCode(userId, code, shopId, products) {
     checkValidProductForDiscount(productId, currentCode.discount_apply_for, currentCode.discount_product_ids)
     checkTotalPriceWithMinimumValue(totalPrice, currentCode.discount_min_order_value)
 
-    return true
+    return currentCode
 }
 //---------------------------------------------------------------------
 /*
@@ -143,8 +137,6 @@ class DiscountService {
         2 - mã cho từng specific product
         */
         const discountCode = await findExistingCode(shopId, code)
-        if (!discountCode) throw new ErrorResponse.BadRequestError('Code is not existed!')
-        console.log(discountCode)
         return await findAvalibleProductForDiscount[discountCode.discount_apply_for](sortBy, page, limit, shopId, discountCode.discount_product_ids)
     }
 
@@ -166,18 +158,26 @@ class DiscountService {
      * @param {*} shopId :"The id of the shop that issued this discount code"
      * @param {*} products : "It is object include productId, price and quantity"
      */
-    static async applyDiscountCodeForProduct(userId, code, shopId, products) {
+    static async applyDiscountCodeForProduct({ userId, code, shopId, products }) {
         const { price, quantity } = products
         const totalPrice = price * quantity
-        if ((await isValidateForApplyCode(userId, code, shopId, products))) {
-            const totalDiscountPrice = currentCode.discount_type === 'specific' ? (totalPrice * currentCode.discount_value / 100) : currentCode.discount_value
-            return {
-                "Discounted Price": totalDiscountPrice,
-                "Initial Price": totalPrice,
-                "Final Price: ": totalPrice - totalDiscountPrice
-            }
+        const discountCode = await isValidateForApplyCode(userId, code, shopId, products)
+        const totalDiscountPrice = discountCode.discount_type === 'percentage' ? (totalPrice * discountCode.discount_value / 100) : discountCode.discount_value
+        return {
+            "Initial Price": totalPrice,
+            "Final Price: ": (totalPrice - totalDiscountPrice),
+            "Discount Amount": totalDiscountPrice
         }
-        throw ErrorResponse.ErrorResponse("Something went wrong!!")
+    }
+
+    static async deleteDiscountCode({ codeId, shopId }) {
+        const filter = {
+            _id: objectIdParser(codeId),
+            discount_shop_id: objectIdParser(shopId)
+        }
+        const result = await DiscountRepository.deleteDiscount(filter)
+        if (!result) throw new ErrorResponse.NotFoundError("Something went wrong")
+        return result
     }
 
 

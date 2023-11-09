@@ -36,6 +36,9 @@ async function addNewProductToCart(cartId, product) {
                 shop_id: product.product_shop_id,
                 quantity: 1
             }
+        },
+        $inc: {
+            cart_products_count: 1
         }
     }
     const filter = {
@@ -86,9 +89,9 @@ async function findCartWithUserIdAndProductId(userId, productId) {
     return await CartRepository.findCartWithUnSelectField(filter, getUnselectDataForQuery(unSelectField))
 }
 
-async function updateQuantityProduct(cartId, productId, quantity) {
+async function updateQuantityProduct(userId, productId, quantity) {
     const filter = {
-        _id: cartId,
+        cart_user_id: userId,
         "cart_products.product_id": objectIdParser(productId)
     }
     const bodyUpdate = {
@@ -99,21 +102,6 @@ async function updateQuantityProduct(cartId, productId, quantity) {
     return await CartRepository.updateSpecificCart(filter, bodyUpdate, {})
 }
 
-async function removeProductFromCart(cartId, productId) {
-    const filter = {
-        _id: cartId
-    };
-
-    const bodyUpdate = {
-        $pull: {
-            "cart_products": {
-                "product_id": objectIdParser(productId)
-            }
-        }
-    };
-
-    return await CartRepository.updateSpecificCart(filter, bodyUpdate, {});
-}
 
 //--------------------MAIN FUNCTION-------------------------
 class CartService {
@@ -121,10 +109,33 @@ class CartService {
     /*
             ---------CARTPRODUCT SERVICE-------------
             1. ADD PRODUCT TO CART [USER]
-            2. INCREASE QUATITY PRODUCT IN CART
-            3. REDUCE QUANITTY PRODUCT IN CART
+            2. INCREASE QUATITY PRODUCT IN CART [USER]
+            3. REDUCE QUANITTY PRODUCT IN CART [USER]
+            4. GET PRODUCT FROM CART [USER]
             
     */
+
+    static async removeProductFromCart(userId, productId) {
+        const filter = {
+            cart_user_id: userId,
+            "cart_products.product_id": objectIdParser(productId)
+        };
+
+        const bodyUpdate = {
+            $pull: {
+                "cart_products": {
+                    "product_id": objectIdParser(productId)
+                }
+            },
+            $inc: {
+                "cart_products_count": -1
+            }
+        };
+
+        const result = await CartRepository.updateSpecificCart(filter, bodyUpdate, {});
+        if (!result) throw new ErrorResponse.NotFoundError("Not found Products In your cart")
+        return result
+    }
 
     static async createNewCart(body) {
         return await CartRepository.createCart(body)
@@ -136,11 +147,24 @@ class CartService {
             throw new ErrorResponse.NotFoundError("Not found valid product")
         }
         if (newQuantity <= 0) {
-            return await removeProductFromCart(cart._id, product_id)
+            return await this.removeProductFromCart(userId, product_id)
         } else {
-            return await updateQuantityProduct(cart._id, product_id, newQuantity)
+            return await updateQuantityProduct(userId, product_id, newQuantity)
         }
+    }
 
+
+    static async findActiveCartByUserId(userId) {
+        const filter = {
+            cart_user_id: userId,
+            cart_status: 'active'
+        }
+        const unSelectField = ['createdAt', 'updatedAt', '__v']
+        const cart = await CartRepository.findCartWithUnSelectField(filter, getUnselectDataForQuery(unSelectField))
+        if (!cart) {
+            throw new ErrorResponse.NotFoundError("Something went wrong with you cart")
+        }
+        return cart
     }
 
 

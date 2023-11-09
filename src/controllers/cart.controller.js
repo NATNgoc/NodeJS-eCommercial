@@ -19,6 +19,22 @@ class CartController {
             metaData: await CartService.updateProductQuantityInCart(req.headers[HEADER.client_id], { ...req.body })
         }).send(res)
     }
+
+    removeProductFromCart = async (req, res, next) => {
+        return new SuccesResponse.OkResponse({
+            ...req.body,
+            message: "Remove Product from cart succesfully",
+            metaData: await CartService.removeProductFromCart(req.headers[HEADER.client_id], req.params.productId)
+        }).send(res)
+    }
+
+    findCartByUserId = async (req, res, next) => {
+        return new SuccesResponse.OkResponse({
+            ...req.body,
+            message: "Increase Quantity Product in cart succesfully",
+            metaData: await CartService.findActiveCartByUserId(req.headers[HEADER.client_id])
+        }).send(res)
+    }
 }
 const cartController = new CartController()
 module.exports = cartController

@@ -1,4 +1,4 @@
-
+'use strict'
 const mongoose = require('mongoose'); // Erase if already required
 const INVENTORY_COLLECTION_NAME = 'inventories'
 const INVENTORY_DOCUMENTS_NAME = 'inventory'

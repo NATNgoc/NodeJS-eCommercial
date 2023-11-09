@@ -1,4 +1,4 @@
-
+'use strict'
 const mongoose = require('mongoose'); // Erase if already required
 const DISCOUNT_COLLECTION_NAME = 'discounts'
 const DISCOUNT_DOCUMENTS_NAME = 'discount'
@@ -60,7 +60,7 @@ var discountSchema = new mongoose.Schema({
     },
     discount_is_active: {
         type: Boolean,
-        default: true,
+        default: false,
         required: true
     },
     discount_apply_for: {

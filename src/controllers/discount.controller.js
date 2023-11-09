@@ -11,11 +11,11 @@ class DiscountController {
         }).send(res)
     }
 
-    findAllProductByCode = async (req, res, next) => {
+    findAllProductByCodeForUser = async (req, res, next) => {
         return new SuccesResponse.OkResponse({
             ...req.body,
             message: "Create code succesfully",
-            metaData: await DiscountService.getAllProductByDiscountCode({ ...req.query }, req.query.code, req.query.shopId)
+            metaData: await DiscountService.getAllProductByDiscountCodeForUser({ ...req.query }, req.query.code, req.query.shopId)
         }).send(res)
     }
 
@@ -34,6 +34,15 @@ class DiscountController {
             metaData: await DiscountService.applyDiscountCodeForProduct({ ...req.body })
         }).send(res)
     }
+
+    deleteDiscountCode = async (req, res, next) => {
+        return new SuccesResponse.OkResponse({
+            ...req.body,
+            message: "Delete succesfully",
+            metaData: await DiscountService.deleteDiscountCode({ ...req.body })
+        }).send(res)
+    }
+
 }
 const discountController = new DiscountController()
 module.exports = discountController

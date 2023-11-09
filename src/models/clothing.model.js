@@ -1,3 +1,4 @@
+'use strict'
 const mongoose = require('mongoose'); // Erase if already required
 const CLOTHING_COLLECTION_NAME = 'clothings'
 const CLOTHING_DOCUMENTS_NAME = 'clothing'

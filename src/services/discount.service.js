@@ -131,13 +131,15 @@ class DiscountService {
         })
     }
 
-    static async getAllProductByDiscountCode({ sortBy = 'ctime', page = 0, limit = 20 }, code, shopId) {
+    static async getAllProductByDiscountCodeForUser({ sortBy = 'ctime', page = 0, limit = 20 }, code, shopId) {
         /*
         1 - mã cho all product
         2 - mã cho từng specific product
         */
         const discountCode = await findExistingCode(shopId, code)
-        return await findAvalibleProductForDiscount[discountCode.discount_apply_for](sortBy, page, limit, shopId, discountCode.discount_product_ids)
+        if (!discountCode.discount_is_active) throw new ErrorResponse.ForBiddenRequestError("Discount code is currently not availible")
+        const typeOfDiscount = discountCode.discount_apply_for
+        return await findAvalibleProductForDiscount[typeOfDiscount](sortBy, page, limit, shopId, discountCode.discount_product_ids)
     }
 
     static async getAllDiscountCodeForShop({ sortBy = 'ctime', page = 0, limit = 10 }, shopId) {
@@ -176,6 +178,7 @@ class DiscountService {
             discount_shop_id: objectIdParser(shopId)
         }
         const result = await DiscountRepository.deleteDiscount(filter)
+        console.log(result)
         if (!result) throw new ErrorResponse.NotFoundError("Something went wrong")
         return result
     }

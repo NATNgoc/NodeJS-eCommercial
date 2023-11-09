@@ -1,3 +1,4 @@
+'use strict'
 const mongoose = require('mongoose'); // Erase if already required
 const ELECTIONIC_COLLECTION_NAME = 'electronics'
 const ELECTRONIC_DOCUMENTS_NAME = 'electronic'

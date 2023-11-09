@@ -1,6 +1,7 @@
 
 const { default: mongoose } = require('mongoose')
-const productModel = require('../product.model')
+const productModel = require('../product.model');
+const { objectIdParser } = require('../../utils');
 
 class ProductRepository {
 
@@ -71,10 +72,9 @@ class ProductRepository {
 
     static async findProductById({ product_id, unSelect }) {
         return await productModel
-            .findById(new mongoose.Types.ObjectId(product_id))
+            .findById(product_id)
             .select(unSelect)
             .lean()
-            .exec()
     }
 
 

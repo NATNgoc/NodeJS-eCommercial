@@ -1,3 +1,4 @@
+'use strict'
 const mongoose = require('mongoose'); // Erase if already required
 const slugify = require('slugify')
 const PRODUCT_COLLECTION_NAME = 'products'

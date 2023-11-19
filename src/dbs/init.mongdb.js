@@ -15,7 +15,10 @@ class DatabaseMongoDB {
             mongoose.set('debug', true)
             mongoose.set('debug', { color: true })
         }
-        mongoose.connect(connectString).then(_ => {
+        mongoose.connect(connectString, {
+            socketTimeoutMS: 30000,
+            maxPoolSize: 30
+        }).then(_ => {
             console.log("Connect mongoDB succesfully")
         }).catch(err => {
             console.log("Have some error in connection to MongoDB", err)

@@ -11,5 +11,5 @@ router.use(errorHanlder.functionHanlder(authentication))
 router.post('/', errorHanlder.functionHanlder(discountValidator.validateCreateDiscountCode), errorHanlder.functionHanlder(discountController.createNewDiscountCode))
 router.delete('/', errorHanlder.functionHanlder(discountValidator.validateDeleteDiscountCode), errorHanlder.functionHanlder(discountController.deleteDiscountCode))
 router.get('/all', errorHanlder.functionHanlder(discountController.findAllDiscountCodeForShop))
-router.patch('/apply', errorHanlder.functionHanlder(discountController.applyDiscountCode))
+router.get('/apply', errorHanlder.functionHanlder(discountController.getDiscountCodeAmount))
 module.exports = router

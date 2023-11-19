@@ -160,7 +160,7 @@ class DiscountService {
      * @param {*} shopId :"The id of the shop that issued this discount code"
      * @param {*} products : "It is object include productId, price and quantity"
      */
-    static async applyDiscountCodeForProduct({ userId, code, shopId, products }) {
+    static async getDiscountCodeForProduct({ userId, code, shopId, products }) {
         const { price, quantity } = products
         const totalPrice = price * quantity
         const discountCode = await isValidateForApplyCode(userId, code, shopId, products)

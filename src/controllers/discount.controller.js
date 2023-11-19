@@ -27,11 +27,11 @@ class DiscountController {
         }).send(res)
     }
 
-    applyDiscountCode = async (req, res, next) => {
+    getDiscountCodeAmount = async (req, res, next) => {
         return new SuccesResponse.OkResponse({
             ...req.body,
             message: "Use code succesfully",
-            metaData: await DiscountService.applyDiscountCodeForProduct({ ...req.body })
+            metaData: await DiscountService.getDiscountCodeForProduct({ ...req.body })
         }).send(res)
     }
 
